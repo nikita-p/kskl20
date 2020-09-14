@@ -18,6 +18,7 @@ Washer::Washer(const std::vector<std::string>& pathes): trees(pathes), fCurrent(
 void Washer::InitBranches(){
     fChain->SetBranchAddress("ebeam", &ebeam, &b_ebeam);
     fChain->SetBranchAddress("nt", &nt, &b_nt);
+    fChain->SetBranchAddress("nks", &nks, &b_nks);
 }
 
 void Washer::Print(){

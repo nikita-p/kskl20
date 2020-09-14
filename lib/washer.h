@@ -24,6 +24,8 @@ class Washer{
     TBranch *b_ebeam;
     Int_t nt;
     TBranch *b_nt;
+    Int_t nks;
+    TBranch *b_nks;
 
     //Hide vars and methods
     int fCurrent;
@@ -36,6 +38,13 @@ class Washer{
 
     //Filter methods: one entry input -> true/false output
     bool FilterNTracks();
+    bool FilterNKaons();
+    bool FilterZ(int i);
+    bool FilterChi2(int i);
+    bool FilterMom(int i);
+    bool FilterHits(int i);
+    bool FilterRho(int i);
+    bool FilterTheta(int i);
     bool FilterPolarAngle();
     bool FilterDeDx();
     bool FilterBestMass();
