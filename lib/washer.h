@@ -44,13 +44,13 @@ class Washer{
     TBranch *b_tchi2r;
     Float_t tchi2z[NT];
     TBranch *b_tchi2z;
-    Float_t tcharge[NT];
+    Int_t tcharge[NT];
     TBranch *b_tcharge;
     Int_t kstype[NK];
     TBranch *b_kstype;
     Int_t ksvind[NK][2];
     TBranch *b_ksvind;
-    Int_t ksminv[NK];
+    Float_t ksminv[NK];
     TBranch *b_ksminv;
 
     //Hide vars and methods
@@ -59,7 +59,6 @@ class Washer{
     void InitBranches();
 
     double PiDeDx(int i);
-    int StandardProcedure();
 
   public:
 
@@ -80,7 +79,8 @@ class Washer{
     Washer(const std::vector<std::string>& pathes);
 
     void GetPassedVector();
-    bool Loop(std::vector<bool (Washer::*)()> global_foos, std::vector<bool (Washer::*)(int)> good_tracks_foos);
+    void Loop(const std::vector<bool (Washer::*)()>& global_foos, const std::vector<bool (Washer::*)(int)>& good_tracks_foos);
+    int StandardProcedure();
     int Roll(); //compute full analysis
 //     std::ostream& operator<<(std::ostream&, TTree&); //print the Tree in file (or terminal)
     void Save(std::string file, std::vector<std::string> fields);
