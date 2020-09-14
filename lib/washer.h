@@ -14,6 +14,8 @@
 
 #define mKs 497.614
 #define mPi 139.570
+#define NT 8
+#define NK 5
 
 class Washer{
     std::vector<std::string> trees;
@@ -26,12 +28,37 @@ class Washer{
     TBranch *b_nt;
     Int_t nks;
     TBranch *b_nks;
+    Float_t tth[NT];
+    TBranch *b_tth;
+    Float_t tz[NT];
+    TBranch *b_tz;
+    Float_t tptot[NT];
+    TBranch *b_tptot;
+    Float_t trho[NT];
+    TBranch *b_trho;
+    Int_t tnhit[NT];
+    TBranch *b_tnhit;
+    Float_t tdedx[NT];
+    TBranch *b_tdedx;
+    Float_t tchi2r[NT];
+    TBranch *b_tchi2r;
+    Float_t tchi2z[NT];
+    TBranch *b_tchi2z;
+    Float_t tcharge[NT];
+    TBranch *b_tcharge;
+    Int_t kstype[NK];
+    TBranch *b_kstype;
+    Int_t ksvind[NK][2];
+    TBranch *b_ksvind;
+    Int_t ksminv[NK];
+    TBranch *b_ksminv;
 
     //Hide vars and methods
     int fCurrent;
     Long64_t LoadTree(Long64_t entry);
     void InitBranches();
 
+    double PiDeDx(int i);
     int StandardProcedure();
 
   public:
@@ -45,8 +72,7 @@ class Washer{
     bool FilterHits(int i);
     bool FilterRho(int i);
     bool FilterTheta(int i);
-    bool FilterPolarAngle();
-    bool FilterDeDx();
+    bool FilterDeDx(int i);
     bool FilterBestMass();
 
     Washer();
@@ -54,7 +80,7 @@ class Washer{
     Washer(const std::vector<std::string>& pathes);
 
     void GetPassedVector();
-    bool Loop(std::vector<bool (Washer::*)()> foos);
+    bool Loop(std::vector<bool (Washer::*)()> global_foos, std::vector<bool (Washer::*)(int)> good_tracks_foos);
     int Roll(); //compute full analysis
 //     std::ostream& operator<<(std::ostream&, TTree&); //print the Tree in file (or terminal)
     void Save(std::string file, std::vector<std::string> fields);

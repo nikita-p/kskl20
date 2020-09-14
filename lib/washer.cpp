@@ -15,12 +15,6 @@ Washer::Washer(const std::vector<std::string>& pathes): trees(pathes), fCurrent(
     InitBranches();
 }
 
-void Washer::InitBranches(){
-    fChain->SetBranchAddress("ebeam", &ebeam, &b_ebeam);
-    fChain->SetBranchAddress("nt", &nt, &b_nt);
-    fChain->SetBranchAddress("nks", &nks, &b_nks);
-}
-
 void Washer::Print(){
     fChain->Print();
     return;
@@ -46,7 +40,7 @@ Long64_t Washer::LoadTree(Long64_t entry){
     return centry;
 }
 
-bool Washer::Loop(std::vector<bool (Washer::*)()> foos){
+bool Washer::Loop(std::vector<bool (Washer::*)()> global_foos, std::vector<bool (Washer::*)(int)> good_tracks_foos){
     Long64_t nentries = fChain->GetEntriesFast();
     Long64_t nbytes = 0, nb = 0;
 
@@ -58,10 +52,19 @@ bool Washer::Loop(std::vector<bool (Washer::*)()> foos){
             break;
         nb = fChain->GetEntry(jentry);
         nbytes += nb;
-        for(auto& foo : foos){
+        for(auto& foo : global_foos){
             passed[jentry] = ( passed[jentry] && (this->*foo)() ) ? true : false;
-            std::cout << passed[jentry] << ' ';
+            // std::cout << passed[jentry] << ' ';
         }
+        if (!passed[jentry])
+            continue;
+        int good_tracks = 0;
+        for(int i=0; i<nt; i++){
+            for(auto& foo : good_tracks_foos){
+                good_tracks += (this->*foo)(i);
+            }
+        }
+        passed[jentry] = ( passed[jentry] && (good_tracks==2) ) ? true : false;
     }
 
 }

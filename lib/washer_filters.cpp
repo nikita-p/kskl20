@@ -32,9 +32,6 @@ bool Washer::FilterTheta(int i){
     return (tth[i] > 0.6) && (tth[i] < TMath::Pi() - 0.6);
 }
 
-
-std::vector<int> GoodTracks(){
-    for( int i=0; i<nt; i++){
-        if(fabs(tz[]))
-    }
+bool Washer::FilterDeDx(int i){
+    return fabs(this->PiDeDx(i)) < 2000;
 }
