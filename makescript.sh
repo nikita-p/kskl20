@@ -1,0 +1,1 @@
+g++ main.cpp lib/washer.h lib/washer.cpp lib/washer_filters.cpp `root-config --cflags --glibs`
