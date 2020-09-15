@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <unordered_set>
 #include <functional>
 
 #include <TROOT.h>
@@ -21,6 +22,7 @@ class Washer{
     std::vector<std::string> trees;
     TChain* fChain;
     std::vector<bool> passed;
+    std::vector<short> good_kaons;
 
     Float_t ebeam;
     TBranch *b_ebeam;
@@ -54,6 +56,8 @@ class Washer{
     TBranch *b_ksminv;
 
     //Hide vars and methods
+    std::pair<int, int> good_tracks;
+    std::unordered_set<int> tracks;
     int fCurrent;
     Long64_t LoadTree(Long64_t entry);
     void InitBranches();
@@ -65,13 +69,13 @@ class Washer{
     //Filter methods: one entry input -> true/false output
     bool FilterNTracks();
     bool FilterNKaons();
-    bool FilterZ(int i);
-    bool FilterChi2(int i);
-    bool FilterMom(int i);
-    bool FilterHits(int i);
-    bool FilterRho(int i);
-    bool FilterTheta(int i);
-    bool FilterDeDx(int i);
+    bool FilterZ();
+    bool FilterChi2();
+    bool FilterMom();
+    bool FilterHits();
+    bool FilterRho();
+    bool FilterTheta();
+    bool FilterDeDx();
     bool FilterBestMass();
 
     Washer();
@@ -79,10 +83,9 @@ class Washer{
     Washer(const std::vector<std::string>& pathes);
 
     void GetPassedVector();
-    void Loop(const std::vector<bool (Washer::*)()>& global_foos, const std::vector<bool (Washer::*)(int)>& good_tracks_foos);
+    void Loop(const std::vector<bool (Washer::*)()>& global_foos);
     int StandardProcedure();
     int Roll(); //compute full analysis
-//     std::ostream& operator<<(std::ostream&, TTree&); //print the Tree in file (or terminal)
     void Save(std::string file, std::vector<std::string> fields);
     void Print();
 };

@@ -8,30 +8,51 @@ bool Washer::FilterNKaons(){
     return (nks>0);
 }
 
-bool Washer::FilterZ(int i){
-    return fabs(tz[i]) < 10;
+bool Washer::FilterZ(){
+    for(auto it = tracks.begin(); it!=tracks.end();){
+        it = (fabs(tz[*it]) < 10) ? ++it : tracks.erase(it);
+    }
+    return (tracks.size()>=2);
 }
 
-bool Washer::FilterChi2(int i){
-    return (tchi2r[i] < 30) && (tchi2z[i] < 25);
+bool Washer::FilterChi2(){
+    for(auto it = tracks.begin(); it!=tracks.end();){
+        it = (tchi2r[*it] < 30) && (tchi2z[*it] < 25) ? ++it : tracks.erase(it);
+    }
+    return (tracks.size()>=2);
 }
 
-bool Washer::FilterMom(int i){
-    return (tptot[i] > 40.);
+bool Washer::FilterMom(){
+    for(auto it = tracks.begin(); it!=tracks.end();){
+        it = (tptot[*it] > 40.) ? ++it : tracks.erase(it);
+    }
+    return (tracks.size()>=2);
 }
 
-bool Washer::FilterHits(int i){
-    return tnhit[i] > 6;
+bool Washer::FilterHits(){
+    for(auto it = tracks.begin(); it!=tracks.end();){
+        it = (tnhit[*it] > 6) ? ++it : tracks.erase(it);
+    }
+    return (tracks.size()>=2);
 }
 
-bool Washer::FilterRho(int i){
-    return fabs(trho[i]) > 0.1;
+bool Washer::FilterRho(){
+    for(auto it = tracks.begin(); it!=tracks.end();){
+        it = (fabs(trho[*it]) > 0.1) ? ++it : tracks.erase(it);
+    }
+    return (tracks.size()>=2);
 }
 
-bool Washer::FilterTheta(int i){
-    return (tth[i] > 0.6) && (tth[i] < TMath::Pi() - 0.6);
+bool Washer::FilterTheta(){
+    for(auto it = tracks.begin(); it!=tracks.end();){
+        it = (tth[*it] > 0.6) && (tth[*it] < TMath::Pi() - 0.6) ? ++it : tracks.erase(it);
+    }
+    return (tracks.size()>=2);
 }
 
-bool Washer::FilterDeDx(int i){
-    return fabs(this->PiDeDx(i)) < 2000;
+bool Washer::FilterDeDx(){
+    for(auto it = tracks.begin(); it!=tracks.end();){
+        it = (fabs(this->PiDeDx(*it)) < 2000) ? ++it : tracks.erase(it);
+    }
+    return (tracks.size()>=2);
 }

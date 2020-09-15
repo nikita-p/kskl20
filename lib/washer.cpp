@@ -40,8 +40,7 @@ Long64_t Washer::LoadTree(Long64_t entry){
     return centry;
 }
 
-void Washer::Loop(const std::vector<bool (Washer::*)()>& global_foos,
-                  const std::vector<bool (Washer::*)(int)>& good_tracks_foos){
+void Washer::Loop(const std::vector<bool (Washer::*)()>& global_foos){
     Long64_t nentries = fChain->GetEntriesFast();
     Long64_t nbytes = 0, nb = 0;
 
@@ -53,30 +52,25 @@ void Washer::Loop(const std::vector<bool (Washer::*)()>& global_foos,
             break;
         nb = fChain->GetEntry(jentry);
         nbytes += nb;
+        tracks.clear();
+        for(int i = 0; i<nt; i++){
+            tracks.insert(i);
+        }
         for(auto& foo : global_foos){
             passed[jentry] = ( passed[jentry] && (this->*foo)() );
-            // std::cout << passed[jentry] << ' ';
+            if (!passed[jentry])
+                break;
         }
+        if(passed[jentry])
+            std::cout << jentry << ' ' << nt << ' ' << passed[jentry] << '\n';
         if (!passed[jentry])
             continue;
-        int good_tracks = 0;
-        bool accepted_track = true;
-        for(int i=0; i<nt; i++){
-            for(auto& foo : good_tracks_foos){
-                accepted_track = ( accepted_track && (this->*foo)(i) );
-                if(!accepted_track)
-                    break;
-            }
-            good_tracks += accepted_track;
-        }
-        passed[jentry] = ( passed[jentry] && (good_tracks==2) );
-        std::cout << passed[jentry] << ' ';
     }
 }
 
 int Washer::StandardProcedure(){
-    Loop({&Washer::FilterNTracks, &Washer::FilterNKaons},
-         {&Washer::FilterZ, &Washer::FilterChi2, &Washer::FilterMom,
+    Loop({&Washer::FilterNTracks, &Washer::FilterNKaons, 
+          &Washer::FilterZ, &Washer::FilterChi2, &Washer::FilterMom,
           &Washer::FilterHits, &Washer::FilterRho, &Washer::FilterTheta,
           &Washer::FilterDeDx});
     return 0;
