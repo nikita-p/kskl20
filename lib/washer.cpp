@@ -67,6 +67,10 @@ void Washer::Loop(const std::vector<bool (Washer::*)()>& global_foos){
     }
 }
 
+void Save(std::string file){
+    return;
+}
+
 int Washer::StandardProcedure(){
     Loop({&Washer::FilterNTracks, &Washer::FilterNKaons, 
           &Washer::FilterZ, &Washer::FilterChi2, &Washer::FilterMom,

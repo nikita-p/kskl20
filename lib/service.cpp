@@ -2,6 +2,7 @@
 
 void Washer::InitBranches(){
     fChain->SetBranchAddress("ebeam", &ebeam, &b_ebeam);
+    fChain->SetBranchAddress("emeas", &emeas, &b_emeas);
     fChain->SetBranchAddress("nt", &nt, &b_nt);
     fChain->SetBranchAddress("nks", &nks, &b_nks);
     fChain->SetBranchAddress("tz", tz, &b_tz);
@@ -16,6 +17,7 @@ void Washer::InitBranches(){
     fChain->SetBranchAddress("kstype", kstype, &b_kstype);
     fChain->SetBranchAddress("ksvind", ksvind, &b_ksvind);
     fChain->SetBranchAddress("ksminv", ksminv, &b_ksminv);
+    fChain->SetBranchAddress("ksalign", ksalign, &b_ksalign);
 }
 
 double Washer::PiDeDx(int i){

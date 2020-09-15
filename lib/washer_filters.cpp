@@ -66,19 +66,15 @@ bool Washer::FilterBestMass(){
             minDiv = TMath::Abs(ksminv[i] - mKs);
         }
     }
-    // std::cout << best_kaon << '\n';
     return (best_kaon>0);
 }
 
 bool Washer::FilterKaonTracks(){
     if(best_kaon<0 || best_kaon>=NK)
         return false;
-    // for(const auto& s: std::unordered_set<int>{ksvind[best_kaon][0], ksvind[best_kaon][1]}){
-    //     std::cout << s << std::endl;
-    // }
-    // for(const auto& t: tracks){
-    //     std::cout << t << std::endl;
-    // }
-    // std::cout << (std::unordered_set<int>{ksvind[best_kaon][0], ksvind[best_kaon][1]} == tracks) << "ddd\n";
     return (std::unordered_set<int>{ksvind[best_kaon][0], ksvind[best_kaon][1]} == tracks);
+}
+
+bool Washer::FilterKaonAngle(){
+    return (ksalign[best_kaon]>0.8);
 }

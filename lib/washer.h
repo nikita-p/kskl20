@@ -26,6 +26,8 @@ class Washer{
 
     Float_t ebeam;
     TBranch *b_ebeam;
+    Float_t emeas;
+    TBranch *b_emeas;
     Int_t nt;
     TBranch *b_nt;
     Int_t nks;
@@ -54,6 +56,8 @@ class Washer{
     TBranch *b_ksvind;
     Float_t ksminv[NK];
     TBranch *b_ksminv;
+    Float_t ksalign[NK];
+    TBranch *b_ksalign;
 
     //Hide vars and methods
     std::unordered_set<int> tracks;
@@ -78,6 +82,7 @@ class Washer{
     bool FilterDeDx();
     bool FilterBestMass();
     bool FilterKaonTracks();
+    bool FilterKaonAngle();
 
     Washer();
     Washer(const std::string& path);
@@ -87,6 +92,6 @@ class Washer{
     void Loop(const std::vector<bool (Washer::*)()>& global_foos);
     int StandardProcedure();
     int Roll(); //compute full analysis
-    void Save(std::string file, std::vector<std::string> fields);
+    void Save(std::string file);
     void Print();
 };
