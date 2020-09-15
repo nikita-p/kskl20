@@ -8,6 +8,10 @@ bool Washer::FilterNKaons(){
     return (nks>0);
 }
 
+bool Washer::FilterBadRun(){
+    return !badrun(runnum);
+}
+
 bool Washer::FilterZ(){
     for(auto it = tracks.begin(); it!=tracks.end();){
         it = (fabs(tz[*it]) < 10) ? ++it : tracks.erase(it);

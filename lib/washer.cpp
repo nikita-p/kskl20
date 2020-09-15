@@ -68,13 +68,15 @@ void Washer::Loop(const std::vector<bool (Washer::*)()>& global_foos){
 }
 
 void Save(std::string file){
+    TFile *f = TFile::Open(file.c_str(), "recreate");
     return;
 }
 
 int Washer::StandardProcedure(){
-    Loop({&Washer::FilterNTracks, &Washer::FilterNKaons, 
+    Loop({&Washer::FilterNTracks, &Washer::FilterNKaons, &Washer::FilterBadRun, 
           &Washer::FilterZ, &Washer::FilterChi2, &Washer::FilterMom,
           &Washer::FilterHits, &Washer::FilterRho, &Washer::FilterTheta,
-          &Washer::FilterDeDx, &Washer::FilterBestMass, &Washer::FilterKaonTracks});
+          &Washer::FilterDeDx, 
+          &Washer::FilterBestMass, &Washer::FilterKaonTracks, &Washer::FilterKaonAngle});
     return 0;
 }

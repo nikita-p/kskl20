@@ -11,12 +11,16 @@
 #include <TFile.h>
 #include <TMath.h>
 #include <TMatrix.h>
-// #include "/storeA/ryzhenenkov/badrunfunction.C" //lums
 
 #define mKs 497.614
 #define mPi 139.570
 #define NT 8
 #define NK 5
+
+using std::cout;
+using std::endl;
+
+bool badrun(int runnum);
 
 class Washer{
     std::vector<std::string> trees;
@@ -32,6 +36,8 @@ class Washer{
     TBranch *b_nt;
     Int_t nks;
     TBranch *b_nks;
+    Int_t runnum;
+    TBranch *b_runnum;
     Float_t tth[NT];
     TBranch *b_tth;
     Float_t tz[NT];
@@ -73,6 +79,7 @@ class Washer{
     //Filter methods: one entry input -> true/false output
     bool FilterNTracks();
     bool FilterNKaons();
+    bool FilterBadRun();
     bool FilterZ();
     bool FilterChi2();
     bool FilterMom();
