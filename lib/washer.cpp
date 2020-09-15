@@ -61,9 +61,8 @@ void Washer::Loop(const std::vector<bool (Washer::*)()>& global_foos){
             if (!passed[jentry])
                 break;
         }
-        if(passed[jentry])
-            std::cout << jentry << ' ' << nt << ' ' << passed[jentry] << '\n';
-        if (!passed[jentry])
+        // std::cout << jentry << ' ' << nt << ' ' << tracks.size() << ' ' << passed[jentry] << '\n';
+        if (!passed[jentry] || tracks.size()!=2 )
             continue;
     }
 }
@@ -72,6 +71,6 @@ int Washer::StandardProcedure(){
     Loop({&Washer::FilterNTracks, &Washer::FilterNKaons, 
           &Washer::FilterZ, &Washer::FilterChi2, &Washer::FilterMom,
           &Washer::FilterHits, &Washer::FilterRho, &Washer::FilterTheta,
-          &Washer::FilterDeDx});
+          &Washer::FilterDeDx, &Washer::FilterBestMass, &Washer::FilterKaonTracks});
     return 0;
 }

@@ -56,3 +56,29 @@ bool Washer::FilterDeDx(){
     }
     return (tracks.size()>=2);
 }
+
+bool Washer::FilterBestMass(){
+    double minDiv = TMath::Infinity();
+    best_kaon = -1;
+    for(int i = 0; i < nks; i++){
+        if((TMath::Abs(ksminv[i] - mKs) < minDiv) && (kstype[i]==0)){
+            best_kaon = i;
+            minDiv = TMath::Abs(ksminv[i] - mKs);
+        }
+    }
+    // std::cout << best_kaon << '\n';
+    return (best_kaon>0);
+}
+
+bool Washer::FilterKaonTracks(){
+    if(best_kaon<0 || best_kaon>=NK)
+        return false;
+    // for(const auto& s: std::unordered_set<int>{ksvind[best_kaon][0], ksvind[best_kaon][1]}){
+    //     std::cout << s << std::endl;
+    // }
+    // for(const auto& t: tracks){
+    //     std::cout << t << std::endl;
+    // }
+    // std::cout << (std::unordered_set<int>{ksvind[best_kaon][0], ksvind[best_kaon][1]} == tracks) << "ddd\n";
+    return (std::unordered_set<int>{ksvind[best_kaon][0], ksvind[best_kaon][1]} == tracks);
+}

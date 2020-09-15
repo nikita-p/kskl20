@@ -56,8 +56,8 @@ class Washer{
     TBranch *b_ksminv;
 
     //Hide vars and methods
-    std::pair<int, int> good_tracks;
     std::unordered_set<int> tracks;
+    size_t best_kaon;
     int fCurrent;
     Long64_t LoadTree(Long64_t entry);
     void InitBranches();
@@ -77,6 +77,7 @@ class Washer{
     bool FilterTheta();
     bool FilterDeDx();
     bool FilterBestMass();
+    bool FilterKaonTracks();
 
     Washer();
     Washer(const std::string& path);
