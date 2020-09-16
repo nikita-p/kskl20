@@ -44,7 +44,7 @@ void Washer::Loop(const std::vector<bool (Washer::*)()>& global_foos){
     Long64_t nentries = fChain->GetEntriesFast();
     Long64_t nbytes = 0, nb = 0;
 
-    for (Long64_t jentry = 0; jentry < 10000; jentry++){ //nentries
+    for (Long64_t jentry = 0; jentry < nentries; jentry++){ //nentries
         if(jentry%10000 == 0)
             cout << "Progress: " << int(jentry*100/nentries) << " %\r" << std::flush;
         Long64_t ientry = LoadTree(jentry);
@@ -63,12 +63,9 @@ void Washer::Loop(const std::vector<bool (Washer::*)()>& global_foos){
             if (!passed[jentry])
                 break;
         }
-        // std::cout << jentry << ' ' << nt << ' ' << tracks.size() << ' ' << passed[jentry] << '\n';
         if (!passed[jentry] || tracks.size()!=2 )
             continue;
-        // cout << "Found\n";
         passed_events.push_back({jentry, best_kaon});
-        // cout << jentry << ' ' << ientry << ' ' << best_kaon << ' ' << nks << ' ' << ebeam << endl;
     }
 }
 
@@ -77,9 +74,9 @@ void Washer::Save(std::string file){
     TTree *t = new TTree("t", "Cutted tree");
     float tthc[2], tzc[2], tptotc[2], trhoc[2], tdedxc[2], tchi2rc[2], tchi2zc[2];
     int tnhitc[2];
-    float ksminvc, ksalignc;
-    t->Branch("ebeam", &ebeam, "ebeam/D");
-    t->Branch("emeas", &emeas, "emeas/D");
+    float ksminvc, ksptotc, ksalignc;
+    t->Branch("ebeam", &ebeam, "ebeam/F");
+    t->Branch("emeas", &emeas, "emeas/F");
     t->Branch("trigbits", &trigbits, "trigbits/I");
     t->Branch("tth", &tthc, "tthc[2]/F");
     t->Branch("tz", &tzc, "tzc[2]/F");
@@ -90,6 +87,7 @@ void Washer::Save(std::string file){
     t->Branch("tchi2z", &tchi2zc, "tchi2zc[2]/F");
     t->Branch("tnhit", &tnhitc, "tnhitc[2]/I");
     t->Branch("ksminv", &ksminvc, "ksminv/F");
+    t->Branch("ksptot", &ksptotc, "ksptot/F");
     t->Branch("ksalign", &ksalignc, "ksalign/F");
     
     Long64_t nbytes = 0, nb = 0;
@@ -119,8 +117,8 @@ void Washer::Save(std::string file){
             tnhitc[i] = tnhit[track];
         }
         ksminvc = ksminv[kaon];
+        ksptotc = ksptot[kaon];
         ksalignc = ksalign[kaon];
-        cout << ebeam << endl;
         t->Fill();
     }
     f->Write();
@@ -132,6 +130,6 @@ int Washer::StandardProcedure(){
           &Washer::FilterZ, &Washer::FilterChi2, &Washer::FilterMom,
           &Washer::FilterHits, &Washer::FilterRho, &Washer::FilterTheta,
           &Washer::FilterDeDx,
-          &Washer::FilterBestMass});//, &Washer::FilterKaonTracks, &Washer::FilterKaonAngle});
+          &Washer::FilterBestMass, &Washer::FilterKaonTracks, &Washer::FilterKaonAngle});
     return 0;
 }

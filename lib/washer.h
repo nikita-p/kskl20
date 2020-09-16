@@ -65,6 +65,8 @@ class Washer{
     TBranch *b_ksvind;
     Float_t ksminv[NK];
     TBranch *b_ksminv;
+    Float_t ksptot[NK];
+    TBranch *b_ksptot;
     Float_t ksalign[NK];
     TBranch *b_ksalign;
 

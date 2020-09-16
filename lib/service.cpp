@@ -19,6 +19,7 @@ void Washer::InitBranches(){
     fChain->SetBranchAddress("kstype", kstype, &b_kstype);
     fChain->SetBranchAddress("ksvind", ksvind, &b_ksvind);
     fChain->SetBranchAddress("ksminv", ksminv, &b_ksminv);
+    fChain->SetBranchAddress("ksptot", ksptot, &b_ksptot);
     fChain->SetBranchAddress("ksalign", ksalign, &b_ksalign);
 }
 
