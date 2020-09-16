@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <list>
 #include <unordered_set>
 #include <functional>
 

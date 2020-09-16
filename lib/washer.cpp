@@ -68,7 +68,7 @@ void Washer::Loop(const std::vector<bool (Washer::*)()>& global_foos){
     }
 }
 
-void Save(std::string file){
+void Washer::Save(std::string file){
     TFile *f = TFile::Open(file.c_str(), "recreate");
     TTree *t = new TTree("t", "Cutted tree");
     float tthc[2], tzc[2], tptotc[2], trhoc[2], tdedxc[2], tchi2rc[2], tchi2zc[2];
@@ -89,8 +89,8 @@ void Save(std::string file){
     
     Long64_t nbytes = 0, nb = 0;
     for(const auto& event : passed_events){
-        Long64_t jentry = event->first;
-        size_t kaon = event->second;
+        Long64_t jentry = event.first;
+        size_t kaon = event.second;
         Long64_t ientry = LoadTree(jentry);
         if ((ientry < 0) || (kaon<0) || (kaon>=nks))
             continue;
@@ -114,8 +114,6 @@ void Save(std::string file){
         }
         t->Fill();
     }
-    
-
     return;
 }
 
