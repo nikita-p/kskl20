@@ -26,6 +26,7 @@ class Washer{
     std::vector<std::string> trees;
     TChain* fChain;
     std::vector<bool> passed;
+    std::list<std::pair<Long64_t, size_t>> passed_events;
     std::vector<short> good_kaons;
 
     Float_t ebeam;
@@ -38,6 +39,8 @@ class Washer{
     TBranch *b_nks;
     Int_t runnum;
     TBranch *b_runnum;
+    Int_t trigbits;
+    TBranch *b_trigbits;
     Float_t tth[NT];
     TBranch *b_tth;
     Float_t tz[NT];

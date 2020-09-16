@@ -6,6 +6,7 @@ void Washer::InitBranches(){
     fChain->SetBranchAddress("nt", &nt, &b_nt);
     fChain->SetBranchAddress("nks", &nks, &b_nks);
     fChain->SetBranchAddress("runnum", &runnum, &b_runnum);
+    fChain->SetBranchAddress("trigbits", &trigbits, &b_trigbits);
     fChain->SetBranchAddress("tz", tz, &b_tz);
     fChain->SetBranchAddress("tchi2r", tchi2r, &b_tchi2r);
     fChain->SetBranchAddress("tchi2z", tchi2z, &b_tchi2z);

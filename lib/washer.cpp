@@ -64,11 +64,58 @@ void Washer::Loop(const std::vector<bool (Washer::*)()>& global_foos){
         // std::cout << jentry << ' ' << nt << ' ' << tracks.size() << ' ' << passed[jentry] << '\n';
         if (!passed[jentry] || tracks.size()!=2 )
             continue;
+        passed_events.push_back({jentry, best_kaon});
     }
 }
 
 void Save(std::string file){
     TFile *f = TFile::Open(file.c_str(), "recreate");
+    TTree *t = new TTree("t", "Cutted tree");
+    float tthc[2], tzc[2], tptotc[2], trhoc[2], tdedxc[2], tchi2rc[2], tchi2zc[2];
+    int tnhitc[2];
+    t->Branch("ebeam", &ebeam, "ebeam/D");
+    t->Branch("emeas", &emeas, "emeas/D");
+    t->Branch("trigbits", &trigbits, "trigbits/I");
+    t->Branch("tth", &tthc, "tthc[2]/F");
+    t->Branch("tz", &tzc, "tzc[2]/F");
+    t->Branch("tptot", &tptotc, "tptotc[2]/F");
+    t->Branch("trho", &trhoc, "trhoc[2]/F");
+    t->Branch("tdedx", &tdedxc, "tdedxc[2]/F");
+    t->Branch("tchi2r", &tchi2rc, "tchi2rc[2]/F");
+    t->Branch("tchi2z", &tchi2zc, "tchi2zc[2]/F");
+    t->Branch("tnhit", &tnhitc, "tnhitc[2]/I");
+    t->Branch("ksminv", &ksminv, "ksminv/F");
+    t->Branch("ksalign", &ksalign, "ksalign/F");
+    
+    Long64_t nbytes = 0, nb = 0;
+    for(const auto& event : passed_events){
+        Long64_t jentry = event->first;
+        size_t kaon = event->second;
+        Long64_t ientry = LoadTree(jentry);
+        if ((ientry < 0) || (kaon<0) || (kaon>=nks))
+            continue;
+        nb = fChain->GetEntry(jentry);
+        nbytes += nb;
+
+        int t1 = ksvind[kaon][0], t2 = ksvind[kaon][1];
+
+        int track{-1};
+        for(int i=0; i<2; i++){
+            track = ksvind[kaon][i];
+            tthc[i] = tth[track];
+            tptotc[i] = tptot[track];
+            trhoc[i] = trho[track];
+            tdedxc[i] = tdedx[track];
+            tchi2rc[i] = tchi2r[track];
+            tchi2zc[i] = tchi2z[track];
+            tnhitc[i] = tnhit[track];
+            ksminv[i] = ksminv[track];
+            ksalign[i] = ksalign[track];
+        }
+        t->Fill();
+    }
+    
+
     return;
 }
 
