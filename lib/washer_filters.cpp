@@ -70,7 +70,7 @@ bool Washer::FilterBestMass(){
             minDiv = TMath::Abs(ksminv[i] - mKs);
         }
     }
-    return (best_kaon>0);
+    return (best_kaon>=0);
 }
 
 bool Washer::FilterKaonTracks(){

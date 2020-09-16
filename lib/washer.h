@@ -4,7 +4,6 @@
 #include <vector>
 #include <list>
 #include <unordered_set>
-#include <functional>
 
 #include <TROOT.h>
 #include <TTree.h>

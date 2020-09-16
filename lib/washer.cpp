@@ -45,6 +45,8 @@ void Washer::Loop(const std::vector<bool (Washer::*)()>& global_foos){
     Long64_t nbytes = 0, nb = 0;
 
     for (Long64_t jentry = 0; jentry < nentries; jentry++){ //nentries
+        if(jentry%10000 == 0)
+            cout << "Progress: " << int(jentry*100/nentries) << " %\r" << std::flush;
         Long64_t ientry = LoadTree(jentry);
         if (!passed[jentry])
             continue;
@@ -64,6 +66,7 @@ void Washer::Loop(const std::vector<bool (Washer::*)()>& global_foos){
         // std::cout << jentry << ' ' << nt << ' ' << tracks.size() << ' ' << passed[jentry] << '\n';
         if (!passed[jentry] || tracks.size()!=2 )
             continue;
+        cout << "Found\n";
         passed_events.push_back({jentry, best_kaon});
     }
 }
@@ -114,6 +117,7 @@ void Washer::Save(std::string file){
         }
         t->Fill();
     }
+    t->Write();
     return;
 }
 
@@ -121,7 +125,7 @@ int Washer::StandardProcedure(){
     Loop({&Washer::FilterNTracks, &Washer::FilterNKaons, &Washer::FilterBadRun, 
           &Washer::FilterZ, &Washer::FilterChi2, &Washer::FilterMom,
           &Washer::FilterHits, &Washer::FilterRho, &Washer::FilterTheta,
-          &Washer::FilterDeDx, 
-          &Washer::FilterBestMass, &Washer::FilterKaonTracks, &Washer::FilterKaonAngle});
+          &Washer::FilterDeDx,
+          &Washer::FilterBestMass});//, &Washer::FilterKaonTracks, &Washer::FilterKaonAngle});
     return 0;
 }
