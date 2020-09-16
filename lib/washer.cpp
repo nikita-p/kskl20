@@ -1,8 +1,15 @@
 #include "washer.h"
 
-Washer::Washer(const std::string& path): trees({path}), fCurrent(-1){
+Washer::Washer(const std::string& txtfile): fCurrent(-1){
+    ROOT::EnableImplicitMT(4);
     fChain = new TChain("tr_ph");
-    fChain->Add(path.c_str());
+    std::ifstream f(txtfile);
+    std::string s;
+    while(f >> s){
+        trees.push_back(s);
+        fChain->Add(s.c_str());
+        cout << s << endl;
+    }
     passed = std::vector<bool>(fChain->GetEntries(), true);
     InitBranches();
 }

@@ -12,6 +12,8 @@
 #include <TMath.h>
 #include <TMatrix.h>
 
+#include <omp.h>
+
 #define mKs 497.614
 #define mPi 139.570
 #define NT 8
