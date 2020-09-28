@@ -51,6 +51,7 @@ void Washer::Loop(const std::vector<bool (Washer::*)()>& global_foos){
     Long64_t nentries = fChain->GetEntriesFast();
     Long64_t nbytes = 0, nb = 0;
 
+    cout << "Start loop\n";
     for (Long64_t jentry = 0; jentry < nentries; jentry++){ //nentries
         if(jentry%10000 == 0)
             cout << "Progress: " << int(jentry*100/nentries) << " %\r" << std::flush;
@@ -115,6 +116,7 @@ void Washer::Save(std::string file){
         int track{-1};
         for(int i=0; i<2; i++){
             track = ksvind[kaon][i];
+            tzc[i] = tz[track];
             tthc[i] = tth[track];
             tptotc[i] = tptot[track];
             trhoc[i] = trho[track];
