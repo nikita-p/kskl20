@@ -82,3 +82,10 @@ bool Washer::FilterKaonTracks(){
 bool Washer::FilterKaonAngle(){
     return (ksalign[best_kaon]>0.8);
 }
+
+bool Washer::FilterKaonMom(){
+    double x = emeas*2e-3;
+    double phi =  0.205/(x-0.732) + 0.14;
+    double p0 = sqrt(emeas * emeas - mKs * mKs);
+    return fabs( (ksminv[best_kaon] - mKs)*cos(phi) - (ksptot[best_kaon] - p0)*sin(phi) ) < 10;
+}

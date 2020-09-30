@@ -16,8 +16,8 @@
 
 #define mKs 497.614
 #define mPi 139.570
-#define NT 8
-#define NK 5
+#define NT 15
+#define NK 15
 
 using std::cout;
 using std::endl;
@@ -97,6 +97,7 @@ class Washer{
     bool FilterBestMass();
     bool FilterKaonTracks();
     bool FilterKaonAngle();
+    bool FilterKaonMom();
 
     Washer();
     Washer(const std::string& path);

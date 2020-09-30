@@ -15,6 +15,7 @@ Washer::Washer(const std::string& txtfile): fCurrent(-1){
 }
 
 Washer::Washer(const std::vector<std::string>& pathes): trees(pathes), fCurrent(-1){
+    ROOT::EnableImplicitMT(4);
     fChain = new TChain("tr_ph");
     for(auto& str: pathes)
         fChain->Add(str.c_str());
