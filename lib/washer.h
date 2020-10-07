@@ -71,6 +71,8 @@ class Washer{
     TBranch *b_ksptot;
     Float_t ksalign[NK];
     TBranch *b_ksalign;
+    Float_t kslen[NK];
+    TBranch *b_kslen;
 
     //Hide vars and methods
     std::unordered_set<int> tracks;

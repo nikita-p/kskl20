@@ -1,7 +1,7 @@
 #include "washer.h"
 
 Washer::Washer(const std::string& txtfile): fCurrent(-1){
-    ROOT::EnableImplicitMT(4);
+    ROOT::EnableImplicitMT(8);
     fChain = new TChain("tr_ph");
     std::ifstream f(txtfile);
     std::string s;
@@ -15,7 +15,7 @@ Washer::Washer(const std::string& txtfile): fCurrent(-1){
 }
 
 Washer::Washer(const std::vector<std::string>& pathes): trees(pathes), fCurrent(-1){
-    ROOT::EnableImplicitMT(4);
+    ROOT::EnableImplicitMT(8);
     fChain = new TChain("tr_ph");
     for(auto& str: pathes)
         fChain->Add(str.c_str());
@@ -84,7 +84,7 @@ void Washer::Save(std::string file){
     TTree *t = new TTree("t", "Cutted tree");
     float tthc[2], tzc[2], tptotc[2], trhoc[2], tdedxc[2], tchi2rc[2], tchi2zc[2];
     int tnhitc[2];
-    float ksminvc, ksptotc, ksalignc;
+    float ksminvc, ksptotc, ksalignc, kslenc;
     t->Branch("ebeam", &ebeam, "ebeam/F");
     t->Branch("emeas", &emeas, "emeas/F");
     t->Branch("trigbits", &trigbits, "trigbits/I");
@@ -99,12 +99,17 @@ void Washer::Save(std::string file){
     t->Branch("ksminv", &ksminvc, "ksminv/F");
     t->Branch("ksptot", &ksptotc, "ksptot/F");
     t->Branch("ksalign", &ksalignc, "ksalign/F");
+    t->Branch("kslen", &kslenc, "kslen/F");
     
     Long64_t nbytes = 0, nb = 0;
+    Long64_t nentries = fChain->GetEntriesFast();
+    Long64_t percent = nentries/100;
     cout << "passed_events.size() = " << passed_events.size() << endl;
     cout << "Start save\n";
     for(const auto& event : passed_events){
         Long64_t jentry = event.first;
+        if(jentry%percent == 0)
+            cout << "Saving progress: " << int(jentry*100/nentries) << " %\r" << std::flush;
         size_t kaon = event.second;
         Long64_t ientry = LoadTree(jentry);
         if (ientry < 0)
@@ -131,6 +136,7 @@ void Washer::Save(std::string file){
         ksminvc = ksminv[kaon];
         ksptotc = ksptot[kaon];
         ksalignc = ksalign[kaon];
+        kslenc = kslen[kaon];
         t->Fill();
     }
     f->Write();
