@@ -51,10 +51,11 @@ Long64_t Washer::LoadTree(Long64_t entry){
 void Washer::Loop(const std::vector<bool (Washer::*)()>& global_foos){
     Long64_t nentries = fChain->GetEntriesFast();
     Long64_t nbytes = 0, nb = 0;
+    Long64_t percent = nentries/100;
 
     cout << "Start loop\n";
     for (Long64_t jentry = 0; jentry < nentries; jentry++){ //nentries
-        if(jentry%10000 == 0)
+        if(jentry%percent == 0)
             cout << "Progress: " << int(jentry*100/nentries) << " %\r" << std::flush;
         Long64_t ientry = LoadTree(jentry);
         if (!passed[jentry])
@@ -101,6 +102,7 @@ void Washer::Save(std::string file){
     
     Long64_t nbytes = 0, nb = 0;
     cout << "passed_events.size() = " << passed_events.size() << endl;
+    cout << "Start save\n";
     for(const auto& event : passed_events){
         Long64_t jentry = event.first;
         size_t kaon = event.second;
