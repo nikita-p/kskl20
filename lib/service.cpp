@@ -22,6 +22,7 @@ void Washer::InitBranches(){
     fChain->SetBranchAddress("ksptot", ksptot, &b_ksptot);
     fChain->SetBranchAddress("ksalign", ksalign, &b_ksalign);
     fChain->SetBranchAddress("kslen", kslen, &b_kslen);
+    fChain->SetBranchAddress("ksth", ksth, &b_ksth);
 }
 
 double Washer::PiDeDx(int i){
