@@ -1,4 +1,4 @@
 # Изучение e+e− → KSKL
 
 ## Ссылки
-1. [Документация](docs/Home.md)
+1. [Wiki](docs/Home.md)
