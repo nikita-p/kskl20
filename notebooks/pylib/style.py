@@ -13,7 +13,8 @@ def my_style(title='', xtitle='', ytitle='', gridstyle='--', legend=False):
         plt.legend(frameon=True)
     plt.tight_layout()
     
-def hep_histo(data, bins=10, range=None, label=None):
+def hep_histo(data, bins=10, range=None, label=None, roll_bins=0):
     """Гистограмма, наиболее похожая на то, что нужно в ФЭЧ"""
     histData, histBins = np.histogram(data, range=range, bins=bins)
+    histData = np.roll(histData, roll_bins)
     plt.errorbar( np.convolve(histBins, np.ones(2, dtype=int), 'valid')/2, histData, yerr=np.sqrt(histData), fmt='.', label=label)
