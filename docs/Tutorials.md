@@ -2,6 +2,7 @@
 
 ## Содержание
 1. <a name="mcgpj">MCGPJ моделирование со своим формфактором каона</a>
+1. <a name="points">Получить список точек по сезонам</a>
 
 
 ## [MCGPJ моделирование со своим формфактором каона](#mcgpj)
@@ -13,3 +14,9 @@
     1. `source config/env64.sh`
 1. Теперь с программой можно работать по алгоритму с этой [страницы](https://cmd.inp.nsk.su/wiki/bin/view/CMD3/Cmd3SimRun)
 1. Чтобы вставить свой формфактор в моделирование нужно изменить файл `generator/radcor/src/TKnFormFactor.C` и видимо снова сделать `make`
+
+## [Получить список точек по сезонам](#points)
+Алгоритм:
+
+1. Выполнить `source /sl/cmd3/cc7-64/Cmd3Off/tune.cmd3_runs_scripts.sh`
+1. Выполнить `listoffdata.py --listpoints`
