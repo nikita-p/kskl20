@@ -90,7 +90,7 @@ void Washer::Save(std::string file){
     float tthc[2], tzc[2], tptotc[2], trhoc[2], tdedxc[2], tchi2rc[2], tchi2zc[2];
     int tnhitc[2];
     int runnumc = 0;
-    std::string name = ""; 
+    std::string namec = ""; 
     float ksminvc, ksptotc, ksalignc, kslenc;
     t->Branch("ebeam", &ebeam, "ebeam/F");
     t->Branch("runnum", &runnumc, "runnum/I");
@@ -108,6 +108,7 @@ void Washer::Save(std::string file){
     t->Branch("ksptot", &ksptotc, "ksptot/F");
     t->Branch("ksalign", &ksalignc, "ksalign/F");
     t->Branch("kslen", &kslenc, "kslen/F");
+    t->Branch("name", &namec);
     
     Long64_t nbytes = 0, nb = 0;
     Long64_t nentries = fChain->GetEntriesFast();
@@ -123,8 +124,8 @@ void Washer::Save(std::string file){
         if (ientry < 0)
             continue;
         nb = fChain->GetEntry(jentry);
-        if(name!=fChain->GetFile()->GetName()){
-            name = fChain->GetFile()->GetName();
+        if(namec!=fChain->GetFile()->GetName()){
+            namec = fChain->GetFile()->GetName();
             runnumc++;
         }
         nbytes += nb;        
