@@ -1,3 +1,7 @@
+root://sl10cmd//scan2011/scan2011_tr_ph_fc_e508.7_v7.root
+root://sl10cmd//scan2011/scan2011_tr_ph_fc_e509.8_v7.root
+root://sl10cmd//scan2011/scan2011_tr_ph_fc_e510.5_v7.root
+root://sl10cmd//scan2011/scan2011_tr_ph_fc_e510.8_v7.root
 root://sl10cmd//scan2011/scan2011_tr_ph_fc_e525_v7.root
 root://sl10cmd//scan2011/scan2011_tr_ph_fc_e537.5_v7.root
 root://sl10cmd//scan2011/scan2011_tr_ph_fc_e550_v7.root
