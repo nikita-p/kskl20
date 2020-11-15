@@ -6,6 +6,8 @@ Washer::Washer(const std::string& txtfile): fCurrent(-1){
     std::ifstream f(txtfile);
     std::string s;
     while(f >> s){
+        if(s[0]=='#')
+            continue;
         trees.push_back(s);
         fChain->Add(s.c_str());
         cout << s << endl;
@@ -17,8 +19,11 @@ Washer::Washer(const std::string& txtfile): fCurrent(-1){
 Washer::Washer(const std::vector<std::string>& pathes): trees(pathes), fCurrent(-1){
     ROOT::EnableImplicitMT(8);
     fChain = new TChain("tr_ph");
-    for(auto& str: pathes)
+    for(auto& str: pathes){
+        if(str[0]=='#')
+            continue;
         fChain->Add(str.c_str());
+    }
     passed = std::vector<bool>(fChain->GetEntries(), true);
     InitBranches();
 }
@@ -84,8 +89,11 @@ void Washer::Save(std::string file){
     TTree *t = new TTree("t", "Cutted tree");
     float tthc[2], tzc[2], tptotc[2], trhoc[2], tdedxc[2], tchi2rc[2], tchi2zc[2];
     int tnhitc[2];
+    int runnumc = 0;
+    std::string name = ""; 
     float ksminvc, ksptotc, ksalignc, kslenc;
     t->Branch("ebeam", &ebeam, "ebeam/F");
+    t->Branch("runnum", &runnumc, "runnum/I");
     t->Branch("emeas", &emeas, "emeas/F");
     t->Branch("trigbits", &trigbits, "trigbits/I");
     t->Branch("tth", &tthc, "tthc[2]/F");
@@ -115,6 +123,10 @@ void Washer::Save(std::string file){
         if (ientry < 0)
             continue;
         nb = fChain->GetEntry(jentry);
+        if(name!=fChain->GetFile()->GetName()){
+            name = fChain->GetFile()->GetName();
+            runnumc++;
+        }
         nbytes += nb;        
         if ((kaon<0) || (kaon>=nks))
             continue;

@@ -2,6 +2,7 @@
 
 void Washer::InitBranches(){
     fChain->SetBranchAddress("ebeam", &ebeam, &b_ebeam);
+    fChain->SetBranchAddress("runnum", &runnum, &b_runnum);
     fChain->SetBranchAddress("emeas", &emeas, &b_emeas);
     fChain->SetBranchAddress("nt", &nt, &b_nt);
     fChain->SetBranchAddress("nks", &nks, &b_nks);
