@@ -1,0 +1,4 @@
+/store17/petrov/data/kskl20/tr_ph/11/tr_ph_kskl_508.7_13218.root
+/store17/petrov/data/kskl20/tr_ph/11/tr_ph_kskl_509.8_13260.root
+/store17/petrov/data/kskl20/tr_ph/11/tr_ph_kskl_510.5_13314.root
+/store17/petrov/data/kskl20/tr_ph/11/tr_ph_kskl_510.8_13164.root
