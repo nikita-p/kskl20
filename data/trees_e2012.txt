@@ -1,6 +1,0 @@
-root://sl10cmd//scan2012/scan2012_tr_ph_fc_e508_v7.root
-root://sl10cmd//scan2012/scan2012_tr_ph_fc_e509_v7.root
-root://sl10cmd//scan2012/scan2012_tr_ph_fc_e510_v7.root
-root://sl10cmd//scan2012/scan2012_tr_ph_fc_e511_v7.root
-root://sl10cmd//scan2012/scan2012_tr_ph_fc_e512_v7.root
-root://sl10cmd//scan2012/scan2012_tr_ph_fc_e513_v7.root

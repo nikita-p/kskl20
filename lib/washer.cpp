@@ -93,7 +93,7 @@ void Washer::Save(std::string file){
     std::string namec = ""; 
     float ksminvc, ksptotc, ksalignc, kslenc;
     t->Branch("ebeam", &ebeam, "ebeam/F");
-    t->Branch("runnum", &runnumc, "runnum/I");
+    t->Branch("runnum", &runnum, "runnum/I");
     t->Branch("emeas", &emeas, "emeas/F");
     t->Branch("trigbits", &trigbits, "trigbits/I");
     t->Branch("tth", &tthc, "tthc[2]/F");
@@ -126,7 +126,6 @@ void Washer::Save(std::string file){
         nb = fChain->GetEntry(jentry);
         if(namec!=fChain->GetFile()->GetName()){
             namec = fChain->GetFile()->GetName();
-            runnumc++;
         }
         nbytes += nb;        
         if ((kaon<0) || (kaon>=nks))

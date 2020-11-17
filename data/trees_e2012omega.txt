@@ -1,0 +1,10 @@
+root://sl10cmd//scan2012_omphi/scan2012_omphi_tr_ph_fc_e507_v7.root
+root://sl10cmd//scan2012_omphi/scan2012_omphi_tr_ph_fc_e508_v7.root
+root://sl10cmd//scan2012_omphi/scan2012_omphi_tr_ph_fc_e509.1_v7.root
+root://sl10cmd//scan2012_omphi/scan2012_omphi_tr_ph_fc_e509_v7.root
+root://sl10cmd//scan2012_omphi/scan2012_omphi_tr_ph_fc_e510_v7.root
+root://sl10cmd//scan2012_omphi/scan2012_omphi_tr_ph_fc_e511_1_v7.root
+root://sl10cmd//scan2012_omphi/scan2012_omphi_tr_ph_fc_e511_v7.root
+root://sl10cmd//scan2012_omphi/scan2012_omphi_tr_ph_fc_e512_v7.root
+root://sl10cmd//scan2012_omphi/scan2012_omphi_tr_ph_fc_e514_v7.root
+root://sl10cmd//scan2012_omphi/scan2012_omphi_tr_ph_fc_e525_v7.root
