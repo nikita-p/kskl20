@@ -17,6 +17,7 @@
 1. **trees_mc7_sg.txt**: MC, стандартный генератор, 7-я версия
 1. **trees_mc11_mcgpj.txt**: MC, стандартный генератор, 11-й год (7-я версия)
 1. **trees_mcgpj_11.txt**: MC 2011, MCGPJ генератор, 7-я версия + elabel
+1. **trees_mcgpj_12omega.txt**: MC 2012 rho-omega, MCGPJ генератор, 7-я версия + elabel
 1. **trees_mcgpj_19.txt**: MC 2019, MCGPJ генератор, 7-я версия + elabel
 
 <!-- ### Прочее -->
