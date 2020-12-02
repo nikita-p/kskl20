@@ -18,6 +18,7 @@
 #define mPi 139.570
 #define NT 15
 #define NK 15
+#define NSIM 15
 
 using std::cout;
 using std::endl;
@@ -75,6 +76,14 @@ class Washer{
     TBranch *b_kslen;
     Float_t ksth[NK];
     TBranch *b_ksth;
+    Int_t nsim;
+    TBranch *b_nsim;
+    Int_t simtype[NSIM];
+    TBranch *b_simtype;
+    Int_t simorig[NSIM];
+    TBranch *b_simorig;
+    Float_t simmom[NSIM];
+    TBranch *b_simmom;
 
     //Hide vars and methods
     std::unordered_set<int> tracks;

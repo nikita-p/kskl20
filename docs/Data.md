@@ -20,4 +20,5 @@
 1. **trees_mcgpj_12omega.txt**: MC 2012 rho-omega, MCGPJ генератор, 7-я версия + elabel
 1. **trees_mcgpj_19.txt**: MC 2019, MCGPJ генератор, 7-я версия + elabel
 
-<!-- ### Прочее -->
+### Прочее
+1. **cross_sections_kskl.txt**: аппроксимация сечения KSKL

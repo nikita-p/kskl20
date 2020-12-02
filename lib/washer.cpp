@@ -91,7 +91,7 @@ void Washer::Save(std::string file){
     int tnhitc[2];
     int runnumc = 0;
     std::string namec = ""; 
-    float ksminvc, ksptotc, ksalignc, kslenc;
+    float ksminvc, ksptotc, ksalignc, kslenc, simmomc;
     t->Branch("ebeam", &ebeam, "ebeam/F");
     t->Branch("runnum", &runnum, "runnum/I");
     t->Branch("emeas", &emeas, "emeas/F");
@@ -109,6 +109,7 @@ void Washer::Save(std::string file){
     t->Branch("ksalign", &ksalignc, "ksalign/F");
     t->Branch("kslen", &kslenc, "kslen/F");
     t->Branch("name", &namec);
+    t->Branch("sim_energy", &simmomc, "simmomc/F");
     
     Long64_t nbytes = 0, nb = 0;
     Long64_t nentries = fChain->GetEntriesFast();
@@ -144,6 +145,11 @@ void Washer::Save(std::string file){
             tchi2rc[i] = tchi2r[track];
             tchi2zc[i] = tchi2z[track];
             tnhitc[i] = tnhit[track];
+        }
+        simmomc = 0;
+        for(int i=0; i<nsim; i++){
+            if((simtype[i]==22)&&(simorig[i]==0))
+                simmomc += simmom[i];
         }
         ksminvc = ksminv[kaon];
         ksptotc = ksptot[kaon];
