@@ -76,6 +76,10 @@ class Washer{
     TBranch *b_kslen;
     Float_t ksth[NK];
     TBranch *b_ksth;
+    Float_t ksdpsi[NK];
+    TBranch *b_ksdpsi;
+    Float_t kspipt[NK][2];
+    TBranch *b_kspipt;
     Int_t nsim;
     TBranch *b_nsim;
     Int_t simtype[NSIM];

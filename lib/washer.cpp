@@ -87,11 +87,11 @@ void Washer::Loop(const std::vector<bool (Washer::*)()>& global_foos){
 void Washer::Save(std::string file){
     TFile *f = TFile::Open(file.c_str(), "recreate");
     TTree *t = new TTree("t", "Cutted tree");
-    float tthc[2], tzc[2], tptotc[2], trhoc[2], tdedxc[2], tchi2rc[2], tchi2zc[2];
+    float tthc[2], tzc[2], tptotc[2], trhoc[2], tdedxc[2], tchi2rc[2], tchi2zc[2], kspiptc[2];
     int tnhitc[2];
     int runnumc = 0;
     std::string namec = ""; 
-    float ksminvc, ksptotc, ksalignc, kslenc, simmomc;
+    float ksminvc, ksptotc, ksalignc, kslenc, ksdpsic, simmomc;
     t->Branch("ebeam", &ebeam, "ebeam/F");
     t->Branch("runnum", &runnum, "runnum/I");
     t->Branch("emeas", &emeas, "emeas/F");
@@ -108,6 +108,8 @@ void Washer::Save(std::string file){
     t->Branch("ksptot", &ksptotc, "ksptot/F");
     t->Branch("ksalign", &ksalignc, "ksalign/F");
     t->Branch("kslen", &kslenc, "kslen/F");
+    t->Branch("ksdpsi", &ksdpsic, "ksdpsi/F");
+    t->Branch("kspipt", &kspiptc, "kspipt[2]/F");
     t->Branch("name", &namec);
     t->Branch("sim_energy", &simmomc, "simmomc/F");
     
@@ -145,6 +147,8 @@ void Washer::Save(std::string file){
             tchi2rc[i] = tchi2r[track];
             tchi2zc[i] = tchi2z[track];
             tnhitc[i] = tnhit[track];
+            
+            kspiptc[i] = kspipt[kaon][i];
         }
         simmomc = 0;
         for(int i=0; i<nsim; i++){
@@ -155,6 +159,7 @@ void Washer::Save(std::string file){
         ksptotc = ksptot[kaon];
         ksalignc = ksalign[kaon];
         kslenc = kslen[kaon];
+        ksdpsic = ksdpsi[kaon];
         t->Fill();
     }
     f->Write();

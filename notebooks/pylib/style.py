@@ -21,18 +21,20 @@ def hep_histo(data, bins=10, range=None, label=None, roll_bins=0):
     histData = np.roll(histData, roll_bins)
     plt.errorbar( np.convolve(histBins, np.ones(2, dtype=int), 'valid')/2, histData, yerr=np.sqrt(histData), fmt='.', label=label)
     
-def plot_fit(data, pdf, minuit, bins, range, errors=True, label=None, alpha=0.7, 
+def plot_fit(data, pdf, minuit, bins, hist_range, fit_range=None, errors=True, label=None, alpha=0.7, 
              title=None, xtitle=None, ytitle=None, gridstyle='--', xlim=None, 
              ylim=(0, None), description=True):
     """Нарисовать результат фита"""
+    if fit_range is None:
+        fit_range = hist_range
     fig, ax = plt.subplots()
     par_vals = minuit.values.values()
-    xcoord = np.linspace(range[0], range[1], 200)
-    ax.plot(xcoord, pdf(xcoord, *par_vals[1:])*par_vals[0]*(range[1]-range[0])/bins, alpha=alpha, label='Fit result')
+    xcoord = np.linspace(fit_range[0], fit_range[1], 200)
+    ax.plot(xcoord, pdf(xcoord, *par_vals[1:])*par_vals[0]*(hist_range[1]-hist_range[0])/bins, alpha=alpha, label='Fit result')
     if errors:
-        hep_histo(data, bins, range, label)
+        hep_histo(data, bins, hist_range, label)
     else:
-        ax.hist(data, bins=bins, range=range, histtype='step', label=label)
+        ax.hist(data, bins=bins, range=hist_range, histtype='step', label=label)
     if description:
         s = ''
         for var in minuit.values:
