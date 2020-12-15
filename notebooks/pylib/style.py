@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from .statistics import chi2_ndf_prob
+from scipy import stats
 
 def my_style(title=None, xtitle=None, ytitle=None, gridstyle='--', legend=False, xlim=None, ylim=None):
     """Стиль для адекватного простого отображения картинок"""
@@ -37,9 +39,15 @@ def plot_fit(data, pdf, minuit, bins, hist_range, fit_range=None, errors=True, l
         ax.hist(data, bins=bins, range=hist_range, histtype='step', label=label)
     if description:
         s = ''
-        for var in minuit.values:
+        chi2, ndf = chi2_ndf_prob(data, pdf, fit_range, bins=bins, **minuit.values)
+        s += f'$\\chi^2$ / ndf = {chi2:.2f} / {ndf}\n'
+        s += f'p-value: {1-stats.chi2.cdf(chi2, ndf):.2f}\n'
+        for var in minuit.fixed:
             val, err = minuit.values[var], minuit.errors[var] 
-            s += f'{var} = {val:1.3f}$\\pm${err:3.3f}\n'
+            if minuit.fixed[var]:
+                s += f'{var} = {val:1.3f}\n'
+            else:
+                s += f'{var} = {val:1.3f}$\\pm${err:3.3f}\n'
         props = dict(boxstyle='square', facecolor='ivory', alpha=0.5)
         ax.text(0.05, 0.95, s.strip(), transform=ax.transAxes,
                verticalalignment='top', bbox=props)

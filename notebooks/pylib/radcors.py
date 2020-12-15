@@ -63,7 +63,7 @@ class RadCor:
         if not( np.all(np.diff(sx) > 0) ):
             raise Exception('Problem')
         return quad( lambda x: self.F(x, s)*np.interp(s*(1-x), sx, self.y),
-                    0., Xmax, points=[0, 1], limit=5000, epsrel=0.0001)
+                    0., Xmax, points=[0, 1], limit=50000, epsrel=0.0001)
     def F_Radcor(self, e_beam, Xmax=1):
         integral = self.F_Integral(e_beam, Xmax)
         return ( integral[0]/np.interp(e_beam, self.x, self.y), integral[1]/np.interp(e_beam, self.x, self.y) )
