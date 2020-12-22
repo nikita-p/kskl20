@@ -90,7 +90,8 @@ void Washer::Save(std::string file){
     float tthc[2], tzc[2], tptotc[2], trhoc[2], tdedxc[2], tchi2rc[2], tchi2zc[2], kspiptc[2];
     int tnhitc[2];
     int runnumc = 0;
-    std::string namec = ""; 
+    std::string namec = "";
+    std::vector<int> sim_particlesc{};
     float ksminvc, ksptotc, ksalignc, kslenc, ksdpsic, simmomc;
     t->Branch("ebeam", &ebeam, "ebeam/F");
     t->Branch("runnum", &runnum, "runnum/I");
@@ -111,6 +112,7 @@ void Washer::Save(std::string file){
     t->Branch("ksdpsi", &ksdpsic, "ksdpsi/F");
     t->Branch("kspipt", &kspiptc, "kspipt[2]/F");
     t->Branch("name", &namec);
+    t->Branch("sim_particles", &sim_particlesc);
     t->Branch("sim_energy", &simmomc, "simmomc/F");
     
     Long64_t nbytes = 0, nb = 0;
@@ -150,10 +152,16 @@ void Washer::Save(std::string file){
             
             kspiptc[i] = kspipt[kaon][i];
         }
+        
         simmomc = 0;
+        sim_particlesc.clear();
         for(int i=0; i<nsim; i++){
-            if((simtype[i]==22)&&(simorig[i]==0))
-                simmomc += simmom[i];
+            if(simorig[i]==0){
+                if(simtype[i]==22)
+                    simmomc += simmom[i];
+                else
+                    sim_particlesc.push_back(simtype[i]);
+            }
         }
         ksminvc = ksminv[kaon];
         ksptotc = ksptot[kaon];

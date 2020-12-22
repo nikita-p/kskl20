@@ -1,0 +1,4 @@
+#Multihadrons_Monte-Carlo_with_custom_cross_section_for_some_points_HIGH19
+/store17/petrov/data/kskl20/tr_ph/multi/tr_ph_kskl_550_70260.root
+/store17/petrov/data/kskl20/tr_ph/multi/tr_ph_kskl_700_74366.root
+/store17/petrov/data/kskl20/tr_ph/multi/tr_ph_kskl_950_79625.root
