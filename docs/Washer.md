@@ -1,47 +1,49 @@
-# Washer
+# Документациия
 
-##    `bool FilterNTracks()`
+## Описание класса `Washer`
 
-##    `bool FilterNKaons()`
+### `bool FilterNTracks()`
 
-##    `bool FilterBadRun()`
+### `bool FilterNKaons()`
 
-##    `bool FilterZ()`
+### `bool FilterBadRun()`
 
-##    `bool FilterChi2()`
+### `bool FilterZ()`
 
-##    `bool FilterMom()`
+### `bool FilterChi2()`
 
-##    `bool FilterHits()`
+### `bool FilterMom()`
 
-##    `bool FilterRho()`
+### `bool FilterHits()`
 
-##    `bool FilterTheta()`
+### `bool FilterRho()`
 
-##    `bool FilterDeDx()`
+### `bool FilterTheta()`
 
-##    `bool FilterBestMass()`
+### `bool FilterDeDx()`
 
-##    `bool FilterKaonTracks()`
+### `bool FilterBestMass()`
 
-##    `bool FilterKaonAngle()`
+### `bool FilterKaonTracks()`
 
-##    `bool FilterKaonMom()`
+### `bool FilterKaonAngle()`
 
-##    `Washer()`
+### `bool FilterKaonMom()`
 
-##    `Washer(const std::string& path)`
+### `Washer()`
 
-##    `Washer(const std::vector<std::string>& pathes)`
+### `Washer(const std::string& path)`
 
-##    `void GetPassedVector()`
+### `Washer(const std::vector<std::string>& pathes)`
 
-##    `void Loop(const std::vector<bool (Washer::*)()>& global_foos)`
+### `void GetPassedVector()`
 
-##    `int StandardProcedure()`
+### `void Loop(const std::vector<bool (Washer::*)()>& global_foos)`
 
-##    `int Roll()`
+### `int StandardProcedure()`
 
-##    `void Save(std::string file)`
+### `int Roll()`
 
-##    `void Print()`
+### `void Save(std::string file)`
+
+### `void Print()`

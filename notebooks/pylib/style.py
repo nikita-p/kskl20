@@ -3,25 +3,26 @@ import numpy as np
 from .statistics import chi2_ndf_prob
 from scipy import stats
 
-def my_style(title=None, xtitle=None, ytitle=None, gridstyle='--', legend=False, xlim=None, ylim=None):
+def my_style(title=None, xtitle=None, ytitle=None, gridstyle='--', legend=False, xlim=None, ylim=None, minorgrid=True):
     """Стиль для адекватного простого отображения картинок"""
     plt.title(title)
     plt.xlabel(xtitle)
     plt.ylabel(ytitle)
-    plt.grid(which='major', linestyle=gridstyle)
-    plt.minorticks_on()
-    plt.grid(which='minor', linestyle=':', alpha=0.5)
+    plt.grid(which='major', linestyle=gridstyle, alpha=0.5)
+    if minorgrid:
+        plt.minorticks_on()
+        plt.grid(which='minor', linestyle=':', alpha=0.3)
     plt.xlim(xlim)
     plt.ylim(ylim)
     if legend:
         plt.legend(frameon=True)
     plt.tight_layout()
     
-def hep_histo(data, bins=10, range=None, label=None, roll_bins=0):
+def hep_histo(data, bins=10, range=None, label=None, roll_bins=0, alpha=1):
     """Гистограмма, наиболее похожая на то, что нужно в ФЭЧ"""
     histData, histBins = np.histogram(data, range=range, bins=bins)
     histData = np.roll(histData, roll_bins)
-    plt.errorbar( np.convolve(histBins, np.ones(2, dtype=int), 'valid')/2, histData, yerr=np.sqrt(histData), fmt='.', label=label)
+    plt.errorbar( np.convolve(histBins, np.ones(2, dtype=int), 'valid')/2, histData, yerr=np.sqrt(histData), fmt='.', label=label, alpha=alpha)
     
 def plot_fit(data, pdf, minuit, bins, hist_range, fit_range=None, errors=True, label=None, alpha=0.7, 
              title=None, xtitle=None, ytitle=None, gridstyle='--', xlim=None, 

@@ -27,3 +27,9 @@ def chi2_ndf_prob(data, pdf, fit_range, bins=50, **kwargs):
     d_hist = d_hist - pdf(bins_centers, **kwargs)
     n_pars = len(signature(pdf).parameters) - 1 # x as -1
     return ( ((d_hist/d_errs)**2).sum(), (~d_hist.mask).sum() - n_pars - 1)
+
+def efficiency_error(numerator, denominator):
+    """
+    Определить стандартную ошибку для эффективности
+    """
+    return np.sqrt( (numerator+1)*(numerator+2)/(denominator+2)/(denominator+3) - ((numerator+1)/(denominator+2))**2 )
