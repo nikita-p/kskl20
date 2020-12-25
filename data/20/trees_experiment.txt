@@ -1,0 +1,6 @@
+#Experimental_trees_of_HIGH20
+root://sl10cmd//scan2020/scan2020_tr_ph_fc_e935_v7.root
+root://sl10cmd//scan2020/scan2020_tr_ph_fc_e945_v7.root
+root://sl10cmd//scan2020/scan2020_tr_ph_fc_e950_v7.root
+root://sl10cmd//scan2020/scan2020_tr_ph_fc_e960_v7.root
+root://sl10cmd//scan2020/scan2020_tr_ph_fc_e970_v7.root
