@@ -1,5 +1,7 @@
 # Wiki Home
 
+## [Журнал](Study.md)
+
 ## Описание кода
 1. [Описание класса `Washer`](Washer.md)
 

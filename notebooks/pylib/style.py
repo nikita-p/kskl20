@@ -31,7 +31,7 @@ def plot_fit(data, pdf, minuit, bins, hist_range, fit_range=None, errors=True, l
     if fit_range is None:
         fit_range = hist_range
     fig, ax = plt.subplots()
-    par_vals = minuit.values.values()
+    par_vals = minuit.values#.values()
     xcoord = np.linspace(fit_range[0], fit_range[1], 200)
     ax.plot(xcoord, pdf(xcoord, *par_vals[1:])*par_vals[0]*(hist_range[1]-hist_range[0])/bins, alpha=alpha, label='Fit result')
     if errors:
@@ -40,12 +40,13 @@ def plot_fit(data, pdf, minuit, bins, hist_range, fit_range=None, errors=True, l
         ax.hist(data, bins=bins, range=hist_range, histtype='step', label=label)
     if description:
         s = ''
-        chi2, ndf = chi2_ndf_prob(data, pdf, fit_range, bins=bins, **minuit.values)
+        values_dict = dict(zip(minuit.parameters, minuit.values))
+        chi2, ndf = chi2_ndf_prob(data, pdf, fit_range, bins=bins, **values_dict)
         s += f'$\\chi^2$ / ndf = {chi2:.2f} / {ndf}\n'
         s += f'p-value: {1-stats.chi2.cdf(chi2, ndf):.2f}\n'
-        for var in minuit.fixed:
-            val, err = minuit.values[var], minuit.errors[var] 
-            if minuit.fixed[var]:
+        for var, val, err, fixed in zip(minuit.parameters, minuit.values, minuit.errors, minuit.fixed):
+#             val, err = minuit.values[var], minuit.errors[var] 
+            if fixed: #minuit.fixed[var]:
                 s += f'{var} = {val:1.3f}\n'
             else:
                 s += f'{var} = {val:1.3f}$\\pm${err:3.3f}\n'
