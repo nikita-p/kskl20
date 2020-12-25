@@ -50,18 +50,18 @@
 
 Распределение событий по параметру `x1` аппроксимировалось функцией *f* для сигнала, показанной на рисунке снизу и линейной функцией (kx+b) для фона
 
-<img src='./docs/sources/study/cruijff.png'/>
+<img src='./sources/study/cruijff.png'/>
 
 Примеры фитов для эксперимента и моделирования представлены на рисунках снизу:
 
-<img src="./docs/sources/study/exp19_800.0.png" width="45%"/> <img src="./docs/sources/study/mc19_800.0.png" width="45%"/> 
+<img src="./sources/study/exp19_800.0.png" width="45%"/> <img src="./sources/study/mc19_800.0.png" width="45%"/> 
 
-<img src="./docs/sources/study/exp19_875.0.png" width="45%"/> <img src="./docs/sources/study/mc19_875.0.png" width="45%"/> 
+<img src="./sources/study/exp19_875.0.png" width="45%"/> <img src="./sources/study/mc19_875.0.png" width="45%"/> 
 
 ## [Сечение](#cross_section)
 
 На текущий момент переобработаны данные сезонов 2011 и 2019 гг. 
 Результаты измерения сечения показаны на рисунке снизу:
-![](./docs/sources/study/cs_prelim.png)
+![](./sources/study/cs_prelim.png)
 
 Видно, что сечения согласуются, дальше планирую посмотреть 2012, 2017 (самая долгая часть - сделать моделирование)
