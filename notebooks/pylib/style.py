@@ -33,7 +33,7 @@ def plot_fit(data, pdf, minuit, bins, hist_range, fit_range=None, errors=True, l
     fig, ax = plt.subplots()
     par_vals = minuit.values#.values()
     xcoord = np.linspace(fit_range[0], fit_range[1], 200)
-    ax.plot(xcoord, pdf(xcoord, *par_vals[1:])*par_vals[0]*(hist_range[1]-hist_range[0])/bins, alpha=alpha, label='Fit result')
+    ax.plot(xcoord, pdf(xcoord, *par_vals, fit_range)*(hist_range[1]-hist_range[0])/bins, alpha=alpha, label='Fit result')
     if errors:
         hep_histo(data, bins, hist_range, label)
     else:
@@ -41,7 +41,7 @@ def plot_fit(data, pdf, minuit, bins, hist_range, fit_range=None, errors=True, l
     if description:
         s = ''
         values_dict = dict(zip(minuit.parameters, minuit.values))
-        chi2, ndf = chi2_ndf_prob(data, pdf, fit_range, bins=bins, **values_dict)
+        chi2, ndf = chi2_ndf_prob(data, pdf, fit_range, bins=int(bins*(fit_range[1]-fit_range[0])/(hist_range[1]-hist_range[0])), **values_dict)
         s += f'$\\chi^2$ / ndf = {chi2:.2f} / {ndf}\n'
         s += f'p-value: {1-stats.chi2.cdf(chi2, ndf):.2f}\n'
         for var, val, err, fixed in zip(minuit.parameters, minuit.values, minuit.errors, minuit.fixed):

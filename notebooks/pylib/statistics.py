@@ -22,9 +22,9 @@ def chi2_ndf_prob(data, pdf, fit_range, bins=50, **kwargs):
     d_errs = np.sqrt(d_hist)
     bins_centers = (d_bins[:-1] + d_bins[1:])/2
     d_hist, d_errs = np.ma.masked_array(d_hist, mask=(d_hist==0)), np.ma.masked_array(d_errs, mask=(d_hist==0))
-    scale_factor = d_hist.sum()*((fit_range[1] - fit_range[0])/bins)
+    scale_factor = ((fit_range[1] - fit_range[0])/bins)
     d_hist, d_errs = d_hist/scale_factor, d_errs/scale_factor
-    d_hist = d_hist - pdf(bins_centers, **kwargs)
+    d_hist = d_hist - pdf(bins_centers, **kwargs, fit_range=fit_range)
     n_pars = len(signature(pdf).parameters) - 1 # x as -1
     return ( ((d_hist/d_errs)**2).sum(), (~d_hist.mask).sum() - n_pars - 1)
 
