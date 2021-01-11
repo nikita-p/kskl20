@@ -1,0 +1,16 @@
+#Monte-Carlo_trees_HIGH12
+/store17/petrov/data/kskl20/tr_ph/12/tr_ph_kskl_640_14606.root  
+/store17/petrov/data/kskl20/tr_ph/12/tr_ph_kskl_900_15630.root
+/store17/petrov/data/kskl20/tr_ph/12/tr_ph_kskl_680_14880.root  
+/store17/petrov/data/kskl20/tr_ph/12/tr_ph_kskl_920_15717.root
+/store17/petrov/data/kskl20/tr_ph/12/tr_ph_kskl_720_15027.root  
+/store17/petrov/data/kskl20/tr_ph/12/tr_ph_kskl_936_15839.root
+/store17/petrov/data/kskl20/tr_ph/12/tr_ph_kskl_760_15149.root  
+/store17/petrov/data/kskl20/tr_ph/12/tr_ph_kskl_950_15942.root
+/store17/petrov/data/kskl20/tr_ph/12/tr_ph_kskl_800_15287.root  
+/store17/petrov/data/kskl20/tr_ph/12/tr_ph_kskl_970_16068.root
+/store17/petrov/data/kskl20/tr_ph/12/tr_ph_kskl_840_15368.root  
+/store17/petrov/data/kskl20/tr_ph/12/tr_ph_kskl_980_16189.root
+/store17/petrov/data/kskl20/tr_ph/12/tr_ph_kskl_860_15464.root  
+/store17/petrov/data/kskl20/tr_ph/12/tr_ph_kskl_990_16304.root
+/store17/petrov/data/kskl20/tr_ph/12/tr_ph_kskl_880_15554.root
