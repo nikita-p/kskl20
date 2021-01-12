@@ -73,9 +73,11 @@ class RegEff():
         if self.fit_results is None:
             columns = []
             columns += m.parameters
-            columns += tuple(map(lambda x: f'{x}_err', m.parameters))
+            columns += ( tuple(map(lambda x: f'{x}_err', m.parameters)) + ('eff0', 'eff0_err') )
             self.fit_results = pd.DataFrame(columns=columns)
-        temp_ser = pd.Series(list(m.values) + list(m.errors), index=self.fit_results.columns, name=self.index2energy(index))
+        eff0 = RegEff.sigFunc(0, *m.values)
+        eff0_err = RegEff.sigFunc(0, *(np.array(m.values)+np.array(m.errors))) - eff0
+        temp_ser = pd.Series(list(m.values) + list(m.errors) + [eff0, eff0_err], index=self.fit_results.columns, name=self.index2energy(index))
         if temp_ser.name in self.fit_results.index:
             self.fit_results.drop(temp_ser.name, axis=0, inplace=True)
         self.fit_results = self.fit_results.append(temp_ser)

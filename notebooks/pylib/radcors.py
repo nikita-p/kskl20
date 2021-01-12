@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from scipy.interpolate import make_interp_spline
 from scipy.integrate import quad
+from .regeff import RegEff
 
 class RadCor:
     """
@@ -57,15 +58,15 @@ class RadCor:
         (1/8)*(b**2)*(s4 + s5 + s6) + \
         ((a/p)**2)*(s7 + s8)
         return result
-    def F_Integral(self, e_beam, Xmax=1):
+    def F_Integral(self, e_beam, params, Xmax=1):
         s = 4*(e_beam**2)
         sx = 4*(self.x**2)
         if not( np.all(np.diff(sx) > 0) ):
             raise Exception('Problem')
-        return quad( lambda x: self.F(x, s)*np.interp(s*(1-x), sx, self.y),
+        return quad( lambda x: self.F(x, s)*np.interp(s*(1-x), sx, self.y)*RegEff.sigFunc(np.sqrt(s/4)*x*1e-3, *params),
                     0., Xmax, points=[0, 1], limit=50000, epsrel=0.0001)
-    def F_Radcor(self, e_beam, Xmax=1):
-        integral = self.F_Integral(e_beam, Xmax)
+    def F_Radcor(self, e_beam, params, Xmax=1):
+        integral = self.F_Integral(e_beam, params, Xmax)
         return ( integral[0]/np.interp(e_beam, self.x, self.y), integral[1]/np.interp(e_beam, self.x, self.y) )
 #     def Calc(self, e_beams=None, rounds=1):
 #         if e_beams is None:
