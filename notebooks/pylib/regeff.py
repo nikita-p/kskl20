@@ -12,8 +12,18 @@ from scipy import stats
 import warnings
 
 class RegEff():
-    def __init__(self, df_mc, data_file):
-        self.df = df_mc[['emeas', 'x1', 'sim_energy']].sort_index().copy()
+    def __init__(self, df_mc, data_file, dc_corr_file=None):
+        self.df = df_mc[['emeas', 'x1', 'sim_energy', 'tth[0]', 'tth[1]']].sort_index().copy()
+#         if dc_corr_file is not None:
+#             df_dc = pd.read_csv(dc_corr_file, index_col=0)
+#             df_corrs = ( df_dc.loc[np.digitize( self.df['tth[0]'], df_dc.right ), ['dc_corr', 'dc_corr_err']].reset_index(drop=True), \
+#                          df_dc.loc[np.digitize( self.df['tth[1]'], df_dc.right ), ['dc_corr', 'dc_corr_err']].reset_index(drop=True) )
+#             self.df['dc_corr'] = (df_corrs[0]['dc_corr']*df_corrs[1]['dc_corr']).values
+#             self.df['dc_corr_err'] = self.df['dc_corr']*np.sqrt( (df_corrs[0]['dc_corr_err']/df_corrs[0]['dc_corr'])**2 + \
+#                                                                  (df_corrs[1]['dc_corr_err']/df_corrs[1]['dc_corr'])**2 ).values
+#         else:
+#             self.df['dc_corr'] = 1
+#             self.df['dc_corr_err'] = 0
         file = list(map(lambda x: x.strip(), open(data_file).readlines()[1:]))
         alldat = lambda x: uproot.open(x)['tr_ph'].arrays(filter_name=['simmom'], library='pd', cut='(simtype==22)&(simorig==0)').groupby('entry').sum().values.ravel()
         self.full_values = {float(re.findall(r'_(\d+\.?\d*)_', x)[0]) : alldat(x) for x in progressbar(file)}
@@ -23,9 +33,9 @@ class RegEff():
         self.fit_results = None
     def __variance(self, k, n):
         return (k+1)*(k+2)/(n+2)/(n+3) - (k+1)**2/(n+2)**2
-    def __chi2(self, mu, s, c, N, a):
-        xedges, points, errs = self.get_histo_by_name(self.fit_name)
-        return np.sum( np.square((points - RegEff.sigFunc(xedges, mu, s, c, N, a))/errs) )
+#     def __chi2(self, mu, s, c, N, a):
+#         xedges, points, errs = self.get_histo_by_name(self.fit_name)
+#         return np.sum( np.square((points - RegEff.sigFunc(xedges, mu, s, c, N, a))/errs) )
     def __len__(self):
         return self.uniques.size
     def __getitem__(self, index):
@@ -41,19 +51,24 @@ class RegEff():
         df = self.__getitem__(index)
         fulls = self.full_values[self.index2energy(index)]
         hist_range = (0, np.max(self.full_values[self.uniques[index]]))
-        data1, bins = np.histogram(df.sim_energy, bins=n_bins, range=hist_range)
+        data1, bins = np.histogram(df.sim_energy, bins=n_bins, range=hist_range)#, weights=df.dc_corr)
         data2, bins = np.histogram(fulls, bins=n_bins, range=hist_range)
-#         print(data1[0], data2[0])
         bins = (bins[1:] + bins[:-1])/2
-        data = data1/data2
+        data = (data1+1)/(data2+2)
         data_errs = np.sqrt(self.__variance(data1, data2))
+        #Проблема! Сейчас при подсчёте ошибок не используется неопределённость dc_corr_errs
+#         ind = np.digitize(df.sim_energy, bins[1:], right=True)
+#         err = (df.dc_corr**2 + df.dc_corr_err**2)
+#         err.index = ind
+#         data_errs = np.sqrt(err.groupby(err.index).agg('sum')).reindex(index=np.arange(n_bins)).fillna(0)/data2
+#         print(data_errs)
         return (data, data_errs, bins)
     def fit(self, index, n_bins=100):
         data, data_errs, bins = self.get_histogram_by_index(index, n_bins)
         parameters = {
             'mu':0.02,
-            's':1/25,
-            'c':0.04,
+            's':1/250,
+            'c':0.004,
             'N':0.35,
         }
         parameters_options = {
@@ -68,7 +83,7 @@ class RegEff():
         m.migrad()
         
         if not(m.accurate):
-            raise warnings.RuntimeWarning('Minuit troubles')
+            warnings.warn('Minuit troubles')
 
         if self.fit_results is None:
             columns = []

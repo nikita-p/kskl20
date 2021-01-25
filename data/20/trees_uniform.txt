@@ -1,0 +1,6 @@
+#Uniform_Monte-Carlo_HIGH20
+/store17/petrov/data/kskl_uniform_individual/20/tr_ph_kskl_935_89976.root  
+/store17/petrov/data/kskl_uniform_individual/20/tr_ph_kskl_960_94254.root
+/store17/petrov/data/kskl_uniform_individual/20/tr_ph_kskl_945_91878.root  
+/store17/petrov/data/kskl_uniform_individual/20/tr_ph_kskl_970_95392.root
+/store17/petrov/data/kskl_uniform_individual/20/tr_ph_kskl_950_93145.root
