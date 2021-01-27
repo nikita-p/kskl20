@@ -1,0 +1,10 @@
+#Monte-Carlo_trees_of_OMEGA12
+/store17/petrov/data/kskl20/tr_ph/12_omega/tr_ph_kskl_507_17537.root
+/store17/petrov/data/kskl20/tr_ph/12_omega/tr_ph_kskl_508_17611.root
+/store17/petrov/data/kskl20/tr_ph/12_omega/tr_ph_kskl_509_17668.root
+/store17/petrov/data/kskl20/tr_ph/12_omega/tr_ph_kskl_510_17703.root
+/store17/petrov/data/kskl20/tr_ph/12_omega/tr_ph_kskl_511_17451.root
+/store17/petrov/data/kskl20/tr_ph/12_omega/tr_ph_kskl_511_17742.root
+/store17/petrov/data/kskl20/tr_ph/12_omega/tr_ph_kskl_512_17788.root
+/store17/petrov/data/kskl20/tr_ph/12_omega/tr_ph_kskl_514_17837.root
+/store17/petrov/data/kskl20/tr_ph/12_omega/tr_ph_kskl_525_17885.root

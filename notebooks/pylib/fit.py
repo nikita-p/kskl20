@@ -26,7 +26,7 @@ def fitter(data, fit_range, params, mc=False):
     m = Minuit(cost_function, **parameters)
     for par in m.parameters:
         m.limits[par] = params[par][1]
-    m.errordef=Minuit.LIKELIHOOD
+    m.errordef= Minuit.LIKELIHOOD
     return m
 
 
