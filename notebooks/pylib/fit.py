@@ -46,19 +46,3 @@ def linear_norm(x, k, fit_range):
     w = xmax - xmin
     f = (1/w)*((k*(x-xmin)+1)/((k*w)/2+1))
     return f #np.where(f<0, 0, f)
-
-# def full_pdf(x, m, sL, sR, aL, aR, k, f, **kwargs):
-#     return f*cruijff_norm(x, m, sL, sR, aL, aR, kwargs['fit_range']) + (1-f)*linear_norm(x, k, kwargs['fit_range'])
-       
-# def fit_data(data, fit_range, params, limits, mc=False):
-#     if mc:
-#         limits = limits.copy()
-#         limits[-2] = (0, 0)
-#         limits[-1] = (1, 1)
-#     xmin, xmax = fit_range
-#     data = data[(data>xmin)&(data<xmax)]
-#     m = Minuit(ExtendedUnbinnedNLL(data, lambda x, n, m, sL, sR, aL, aR, k, f: 
-#                                (n, n * full_pdf(x, m, sL, sR, aL, aR, k, f, fit_range=fit_range))), **params)
-#     m.limits=limits
-#     m.errordef=Minuit.LIKELIHOOD
-#     return m   
