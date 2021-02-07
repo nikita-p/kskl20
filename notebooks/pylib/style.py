@@ -58,8 +58,8 @@ def plot_fit(data, cost, minuit, bins, hist_range, fit_range=None, errors=True, 
                 s += f'{var} = {val:1.3f}$\\pm${err:3.3f}\n'
         if 'y0' in minuit.parameters:
             width = (fit_range[1] - fit_range[0])
-            n_bkg = width*(minuit.values['y0'] + minuit.values['y1'])/2
-            n_bkg_err = width*np.sqrt(minuit.errors['y0']**2 + minuit.errors['y1']**2)/2
+            n_bkg = width*(2*minuit.values['y0'] + minuit.values['dy'])/2
+            n_bkg_err = width*np.sqrt(2*minuit.errors['y0']**2 + minuit.errors['dy']**2)/2
             s += f'n_bkg = {n_bkg:1.3f}$\\pm${n_bkg_err:3.3f}\n'
         props = dict(boxstyle='square', facecolor='ivory', alpha=0.5)
         ax.text(0.05, 0.95, s.strip(), transform=ax.transAxes,

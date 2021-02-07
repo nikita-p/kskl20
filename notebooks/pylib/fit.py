@@ -8,22 +8,22 @@ from scipy.stats import poisson
 def sig_pdf(x, m, sL, sR, aL, aR, fit_range):
     return cruijff_norm(x, m, sL, sR, aL, aR, fit_range)
 
-def pdf(x, n_sig, m, sL, sR, aL, aR, y0, y1, fit_range):
-    return n_sig*cruijff_norm(x, m, sL, sR, aL, aR, fit_range) + linear(x, y0, y1, fit_range)
+def pdf(x, n_sig, m, sL, sR, aL, aR, y0, dy, fit_range):
+    return n_sig*cruijff_norm(x, m, sL, sR, aL, aR, fit_range) + linear(x, y0, dy, fit_range)
 
 def fitter(data, fit_range, params, mc=False):
     params = params.copy()
     xmin, xmax = fit_range
     width = xmax - xmin
-    data = data[(data>xmin)&(data<xmax)]
+    data = data[(data>=xmin)&(data<=xmax)]
 #     print(len(data))
     if mc:
         cost_function0 = ExtendedUnbinnedNLL(data, lambda x, n_sig, m, sL, sR, aL, aR: 
             (n_sig, n_sig*sig_pdf(x, m, sL, sR, aL, aR, fit_range)))
         cost_function = cost_function0
-        del params['y0'], params['y1'], 
+        del params['y0'], params['dy'], 
     else:
-        cost_function0 = ExtendedUnbinnedNLL(data, lambda x, n_sig, m, sL, sR, aL, aR, y0, y1: ( n_sig + width*(y0+y1)/2, pdf(x, n_sig, m, sL, sR, aL, aR, y0, y1, fit_range)))
+        cost_function0 = ExtendedUnbinnedNLL(data, lambda x, n_sig, m, sL, sR, aL, aR, y0, dy: ( n_sig + width*(2*y0+dy)/2, pdf(x, n_sig, m, sL, sR, aL, aR, y0, dy, fit_range)))
         cost_function = cost_function0 + NormalConstraint('sL', params['sL'][0], params['sL'][1]) + NormalConstraint('sR', params['sR'][0], params['sR'][1]) + \
                 NormalConstraint('aL', params['aL'][0], params['aL'][1]) + NormalConstraint('aR', params['aR'][0], params['aR'][1]) + NormalConstraint('m', params['m'][0], params['m'][1])
     parameters = {k : params[k][0] for k in params}
@@ -48,8 +48,9 @@ def cruijff_norm(x, m, sL, sR, aL, aR, fit_range):
 #         return np.ones_like(x)/(xmax-xmin)
 
 @nb.njit(parallel=False, fastmath=True)
-def linear(x, y0, y1, fit_range):
+def linear(x, y0, dy, fit_range):
     xmin, xmax = fit_range
+    y1 = y0 + dy
     return (y1 - y0)*(x - xmin)/(xmax - xmin) + y0
 
 @nb.njit(parallel=False, fastmath=True)
