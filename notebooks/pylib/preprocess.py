@@ -15,7 +15,7 @@ def get_x(df: pd.DataFrame) -> (pd.Series, pd.Series):
     x2 =  dE*np.sin(p) + dP*np.cos(p)
     return x1, x2
 
-def read_tree(root_file, mc=False, align_cut=0.8, sim_parts=True) -> pd.DataFrame:
+def read_tree(root_file, mc=False, align_cut=0.8, z_cut=12, sim_parts=True) -> pd.DataFrame:
     """
     Прочитать дерево `root_file` в pd.DataFrame
     """
@@ -51,4 +51,6 @@ def read_tree(root_file, mc=False, align_cut=0.8, sim_parts=True) -> pd.DataFram
     df['ksangle'] = np.arccos(df['ksalign'])
     if align_cut is not None:
         df = df.query('ksalign>@align_cut')
+    if z_cut is not None:
+        df = df.loc[(np.abs(df['tz[0]']) < z_cut) & (np.abs(df['tz[1]']) < z_cut)].copy()
     return df.set_index('ebeam')
