@@ -8,6 +8,7 @@ import uproot
 import re
 from progressbar import progressbar
 from .style import my_style
+from .preprocess import read_tree
 from scipy import stats
 import warnings
 
@@ -63,7 +64,7 @@ class RegEff():
 #         data_errs = np.sqrt(err.groupby(err.index).agg('sum')).reindex(index=np.arange(n_bins)).fillna(0)/data2
 #         print(data_errs)
         return (data, data_errs, bins)
-    def fit(self, index, n_bins=100):
+    def fit(self, index, n_bins=100, data_color=None, fit_color=None, box_color=None):
         data, data_errs, bins = self.get_histogram_by_index(index, n_bins)
         parameters = {
             'mu':0.02,
@@ -99,8 +100,8 @@ class RegEff():
             
         fig, ax = plt.subplots()
         xx = np.linspace(0, np.max(bins), 100)
-        ax.errorbar(bins, data, yerr=data_errs, fmt='.')
-        ax.plot(xx, RegEff.sigFunc(xx, *m.values))
+        ax.errorbar(bins, data, yerr=data_errs, fmt='.', color=data_color)
+        ax.plot(xx, RegEff.sigFunc(xx, *m.values), color=fit_color)
         my_style(title=f'Registration eff. vs rad. photon energy ($\sqrt{{s}}$ = {self.index2energy(index)*2e-3:.3f} GeV)', xlim=(0, np.max(bins)), ylim=(0, None), 
                 xtitle='$E_{\\gamma}$, GeV', ytitle='$\\varepsilon_{reg}$')
         values_dict = dict(zip(m.parameters, m.values))
@@ -112,7 +113,7 @@ class RegEff():
                 s += f'{var} = {val:1.3f}\n'
             else:
                 s += f'{var} = {val:1.3f}$\\pm${err:.4f}\n'
-        props = dict(boxstyle='square', facecolor='ivory', alpha=0.5)
+        props = dict(boxstyle='square', facecolor=box_color, alpha=0.5)
         ax.text(0.65, 0.95, s.strip(), transform=ax.transAxes,
                verticalalignment='top', bbox=props)
         return 

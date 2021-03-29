@@ -14,7 +14,7 @@ bool Washer::FilterBadRun(){
 
 bool Washer::FilterZ(){
     for(auto it = tracks.begin(); it!=tracks.end();){
-        it = (fabs(tz[*it]) < 10) ? ++it : tracks.erase(it);
+        it = (fabs(tz[*it]) < 12) ? ++it : tracks.erase(it);
     }
     return (tracks.size()>=2);
 }

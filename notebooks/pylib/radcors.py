@@ -58,15 +58,16 @@ class RadCor:
         (1/8)*(b**2)*(s4 + s5 + s6) + \
         ((a/p)**2)*(s7 + s8)
         return result
-    def F_Integral(self, e_beam, params, Xmax=1):
+    def F_Integral(self, e_beam, params, Xmax=1, use_efficiency=True):
         s = 4*(e_beam**2)
         sx = 4*(self.x**2)
         if not( np.all(np.diff(sx) > 0) ):
             raise Exception('Problem')
-        return quad( lambda x: self.F(x, s)*np.interp(s*(1-x), sx, self.y)*RegEff.sigFunc(np.sqrt(s/4)*x*1e-3, *params),
+        regeff = lambda x: RegEff.sigFunc(np.sqrt(s/4)*x*1e-3, *params) if use_efficiency else lambda x: 1
+        return quad( lambda x: self.F(x, s)*np.interp(s*(1-x), sx, self.y)*regeff(x),
                     0., Xmax, points=[0, 1], limit=50000, epsrel=0.0001)
-    def F_Radcor(self, e_beam, params, Xmax=1):
-        integral = self.F_Integral(e_beam, params, Xmax)
+    def F_Radcor(self, e_beam, params, Xmax=1, use_efficiency=True):
+        integral = self.F_Integral(e_beam, params, Xmax, use_efficiency)
         return ( integral[0]/np.interp(e_beam, self.x, self.y), integral[1]/np.interp(e_beam, self.x, self.y) )
 #     def Calc(self, e_beams=None, rounds=1):
 #         if e_beams is None:

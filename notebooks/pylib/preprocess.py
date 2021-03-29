@@ -15,7 +15,7 @@ def get_x(df: pd.DataFrame) -> (pd.Series, pd.Series):
     x2 =  dE*np.sin(p) + dP*np.cos(p)
     return x1, x2
 
-def read_tree(root_file, mc=False, align_cut=0.8, z_cut=12, sim_parts=True) -> pd.DataFrame:
+def read_tree(root_file, mc=False, align_cut=0.8, z_cut=12, dedx_cut=2000, sim_parts=True) -> pd.DataFrame:
     """
     Прочитать дерево `root_file` в pd.DataFrame
     """
