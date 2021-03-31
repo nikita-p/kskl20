@@ -1,9 +1,90 @@
 import numba as nb
 import numpy as np
+from .style import plot_fit
 from iminuit import Minuit
 from iminuit.cost import UnbinnedNLL, ExtendedUnbinnedNLL, NormalConstraint 
 from scipy.integrate import quad
 from scipy.stats import poisson
+
+import os
+import warnings
+
+class Fitter():
+    def __init__(self, data, fit_func, pars:dict, lims:dict, fit_range:tuple, sigmas={}):
+        """
+        data - данные для фита
+        fit_func - функция фита (зависит x и фитируемых параметров)
+        pars - словарь с начальными значениями параметров
+        lims - словарь с ограничениями на параметры
+        fit_range - кортеж (xmin, xmax) с областью фитирования
+        sigmas - словарь с отклонением параметров для регуляризации (может использоваться в эксперименте, чтоб мягко ограничить параметры)
+        """
+        xmin, xmax = fit_range
+        self.fit_range = fit_range
+        self.fit_func = fit_func
+        self.data = data
+        self.pars, self.lims = pars, lims
+        self.cost = ExtendedUnbinnedNLL(data[(data>xmin)&(data<xmax)], self.fit_func)
+        cost0 = self.cost
+        for s in sigmas:
+            cost0 += NormalConstraint(s, pars[s], sigmas[s])
+        self.m = Minuit(cost0, **pars)
+        for par in self.m.parameters:
+            self.m.limits[par] = lims[par]
+    def fit(self):
+        self.m.simplex().migrad()
+        if not(self.m.valid):
+            warnings.warn("Fit is not valid", UserWarning)
+    def plot(self, hist_range, bins, title='', label='', xtitle='', ytitle='', 
+             errors=True, alpha=0.8, description=True, fill_errors=False):
+        """
+        Нарисовать фит
+        hist_range:tuple - диапазон, на котором будет изображаться результат
+        bins:int - количество бинов в диапазоне
+        title:str - название картинки
+        label:str - подпись данных
+        xtitle:str - подпись оси x
+        ytitle:str - подпись оси y
+        errors:bool - изображать ли усы для даных
+        alpha:float - прозрачность линии фита в диапазоне [0, 1]
+        description:bool - добавить описание
+        fill_errors:bool - закрасить область одной ошибки для фита
+        """
+        plot_fit(self.data, self.cost, self.m, bins, hist_range, self.fit_range, errors=errors, label=label, xtitle=xtitle, alpha=alpha,
+                   ytitle=ytitle, title=title, description=description, fill_errors=fill_errors)
+    def get_params(self) -> dict:
+        """
+        Вернуть значения параметров фита
+        """
+        return {v : self.m.values[v] for v in self.m.parameters}
+    def get_limits(self, n_sigmas=2, include=['m', 'sL'], my_lims={}) -> dict:
+        """
+        Вернуть ограничения на параметры фита
+        n_sigmas:float - количество сигм для ограничения
+        include:list - список параметров, к которым будет применено ограничение на сигмы
+        my_lims:dict - список кортежей с собственными ограничениями на параметры
+        """
+        lims_dict = self.lims.copy()
+        for key in include:
+            m = self.m.values[key]
+            s = self.m.errors[key]
+            l_min = lims_dict[key][0] if lims_dict[key][0] is not None else m-n_sigmas*s
+            l_max = lims_dict[key][1] if lims_dict[key][1] is not None else m+n_sigmas*s
+            lims_dict[key] = (max(l_min, m-n_sigmas*s), 
+                              min(l_max, m+n_sigmas*s))
+        for key in my_lims:
+            lims_dict[key] = my_lims[key]
+        return lims_dict
+        
+    def get_sigmas(self, exclude=['n_sig']) -> dict:
+        """
+        Вернуть стандартные отклонения для параметров фита
+        exclude:list - список параметров, которые не нужно возвращать
+        """
+        sigmas_dict = {v : self.m.errors[v] for v in self.m.parameters}
+        for ex in exclude:
+            sigmas_dict.pop(ex, None)
+        return sigmas_dict
 
 def sig_pdf(x, m, sL, sR, aL, aR, fit_range):
     return cruijff_norm(x, m, sL, sR, aL, aR, fit_range)

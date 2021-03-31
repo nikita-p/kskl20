@@ -56,7 +56,7 @@ def plot_fit(data, cost, minuit, bins, hist_range, fit_range=None, errors=True, 
                 s += f'{var} = {val:1.3f}\n'
             else:
                 s += f'{var} = {val:1.3f}$\\pm${err:3.3f}\n'
-        if 'y0' in minuit.parameters:
+        if ('y0' in minuit.parameters) and not( (minuit.values['y0'] == 0) and (minuit.values['dy'] == 0) ):
             width = (fit_range[1] - fit_range[0])
             n_bkg = width*(2*minuit.values['y0'] + minuit.values['dy'])/2
             n_bkg_err = width*np.sqrt(2*minuit.errors['y0']**2 + minuit.errors['dy']**2)/2
