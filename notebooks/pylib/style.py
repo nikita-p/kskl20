@@ -26,7 +26,7 @@ def hep_histo(data, bins=10, range=None, label=None, roll_bins=0, alpha=1, color
     
 def plot_fit(data, cost, minuit, bins, hist_range, fit_range=None, errors=True, label=None, alpha=0.7, 
              title=None, xtitle=None, ytitle=None, gridstyle='--', xlim=None, 
-             ylim=(0, None), description=True, fill_errors=False, bbox_color='ivory', fit_color=None, data_color=None):
+             ylim=(0, None), description=True, fill_errors=False, bbox_color='ivory', fit_color=None, data_color=None, fit_func=None):
     """Нарисовать результат фита"""
     if fit_range is None:
         fit_range = hist_range
@@ -56,11 +56,15 @@ def plot_fit(data, cost, minuit, bins, hist_range, fit_range=None, errors=True, 
                 s += f'{var} = {val:1.3f}\n'
             else:
                 s += f'{var} = {val:1.3f}$\\pm${err:3.3f}\n'
-        if ('y0' in minuit.parameters) and not( (minuit.values['y0'] == 0) and (minuit.values['dy'] == 0) ):
-            width = (fit_range[1] - fit_range[0])
-            n_bkg = width*(2*minuit.values['y0'] + minuit.values['dy'])/2
-            n_bkg_err = width*np.sqrt(2*minuit.errors['y0']**2 + minuit.errors['dy']**2)/2
-            s += f'n_bkg = {n_bkg:1.3f}$\\pm${n_bkg_err:3.3f}\n'
+        if fit_func is not None:
+            n_bkg, n_bkg_err = fit_func.get_nbkg(minuit)
+            if n_bkg is not None:
+                s += f'n_bkg = {n_bkg:1.3f}$\\pm${n_bkg_err:3.3f}\n'
+#         if ('y0' in minuit.parameters) and not( (minuit.values['y0'] == 0) and (minuit.values['dy'] == 0) ):
+#             width = (fit_range[1] - fit_range[0])
+#             n_bkg = width*(2*minuit.values['y0'] + minuit.values['dy'])/2
+#             n_bkg_err = width*np.sqrt(2*minuit.errors['y0']**2 + minuit.errors['dy']**2)/2
+#             s += f'n_bkg = {n_bkg:1.3f}$\\pm${n_bkg_err:3.3f}\n'
         props = dict(boxstyle='square', facecolor=bbox_color, alpha=0.5)
         ax.text(0.05, 0.95, s.strip(), transform=ax.transAxes,
                verticalalignment='top', bbox=props)

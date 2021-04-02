@@ -1,6 +1,7 @@
 import numba as nb
 import numpy as np
 from .style import plot_fit
+import iminuit
 from iminuit import Minuit
 from iminuit.cost import UnbinnedNLL, ExtendedUnbinnedNLL, NormalConstraint 
 from scipy.integrate import quad
@@ -13,7 +14,7 @@ class Fitter():
     def __init__(self, data, fit_func, pars:dict, lims:dict, fit_range:tuple, sigmas={}):
         """
         data - данные для фита
-        fit_func - функция фита (зависит x и фитируемых параметров)
+        fit_func:callable - функция фита (зависит x и фитируемых параметров) из классов ниже
         pars - словарь с начальными значениями параметров
         lims - словарь с ограничениями на параметры
         fit_range - кортеж (xmin, xmax) с областью фитирования
@@ -23,14 +24,16 @@ class Fitter():
         self.fit_range = fit_range
         self.fit_func = fit_func
         self.data = data
-        self.pars, self.lims = pars, lims
         self.cost = ExtendedUnbinnedNLL(data[(data>xmin)&(data<xmax)], self.fit_func)
+        parnames = iminuit.util.describe(self.cost) 
+        clear_dict = lambda dic: { p: dic[p] for p in set(parnames)&set(dic.keys())} #вытащить только необходимое из словаря
+        self.pars, self.lims = clear_dict(pars), clear_dict(lims)
         cost0 = self.cost
-        for s in sigmas:
-            cost0 += NormalConstraint(s, pars[s], sigmas[s])
-        self.m = Minuit(cost0, **pars)
+        for s in clear_dict(sigmas):
+            cost0 += NormalConstraint(s, self.pars[s], sigmas[s])
+        self.m = Minuit(cost0, **self.pars)
         for par in self.m.parameters:
-            self.m.limits[par] = lims[par]
+            self.m.limits[par] = self.lims[par]
     def fit(self):
         self.m.simplex().migrad()
         if not(self.m.valid):
@@ -51,7 +54,12 @@ class Fitter():
         fill_errors:bool - закрасить область одной ошибки для фита
         """
         plot_fit(self.data, self.cost, self.m, bins, hist_range, self.fit_range, errors=errors, label=label, xtitle=xtitle, alpha=alpha,
-                   ytitle=ytitle, title=title, description=description, fill_errors=fill_errors)
+                   ytitle=ytitle, title=title, description=description, fill_errors=fill_errors, fit_func=self.fit_func)
+    def get_fitfunc(self) -> callable:
+        """
+        Вернуть функцию фита
+        """
+        return self.fit_func
     def get_params(self) -> dict:
         """
         Вернуть значения параметров фита
@@ -85,6 +93,46 @@ class Fitter():
         for ex in exclude:
             sigmas_dict.pop(ex, None)
         return sigmas_dict
+    
+class Fit1():
+    def __init__(self, fit_range):
+        self.fit_range = fit_range
+        self.w = fit_range[1] - fit_range[0]
+    def __call__(self, x, n_sig, m, sL, sR, aL, aR, y0, dy):
+        return (n_sig + self.w*(2*y0+dy)/2, pdf(x, n_sig, m, sL, sR, aL, aR, y0, dy, self.fit_range))
+    def get_nsig(self, minuit):
+        return (minuit.values['n_sig'], minuit.errors['n_sig'])
+    def get_nbkg(self, minuit):
+        if minuit.fixed['y0'] and minuit.fixed['dy']:
+            return (None, None)
+        v = self.w*(2*minuit.values['y0']+minuit.values['dy'])/2
+        e = self.w*np.sqrt(2*minuit.errors['y0']**2 + minuit.errors['dy']**2)/2
+        return (v, e)
+    
+class Fit2():
+    def __init__(self, fit_range):
+        self.fit_range = fit_range
+        self.xmin, self.xmax = fit_range
+        self.w = fit_range[1] - fit_range[0]
+    def __call__(self, x, n_sig, m, sL, sR, aL, aR, y0, dy, x0):
+        return (n_sig + self.w*y0 + (dy/3)*( (self.xmax-x0)**3 - (self.xmin-x0)**3 ), n_sig*sig_pdf(x, m, sL, sR, aL, aR, self.fit_range) + self.poly2(x, dy, x0, y0))
+    def poly2(self, x, k, x0, c):
+        """
+        k >= 0, x0 <= x_min, c >=0
+        """
+        return k*((x-x0)**2) + c
+    def get_nsig(self, minuit):
+        return (minuit.values['n_sig'], minuit.errors['n_sig'])
+    def get_nbkg(self, minuit):
+        if minuit.fixed['y0'] and minuit.fixed['dy']:
+            return (None, None)
+        x0, x0_err = minuit.values['x0'], minuit.errors['x0']
+        y0, y0_err = minuit.values['y0'], minuit.errors['y0']
+        dy, dy_err = minuit.values['dy'], minuit.errors['dy']
+        v = self.w*y0 + (dy/3)*( (self.xmax-x0)**3 - (self.xmin-x0)**3 )
+        e = 0 # написать правильно
+        return (v, e)
+    
 
 def sig_pdf(x, m, sL, sR, aL, aR, fit_range):
     return cruijff_norm(x, m, sL, sR, aL, aR, fit_range)
