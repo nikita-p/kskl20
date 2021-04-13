@@ -33,7 +33,8 @@ class Fitter():
             cost0 += NormalConstraint(s, self.pars[s], sigmas[s])
         self.m = Minuit(cost0, **self.pars)
         for par in self.m.parameters:
-            self.m.limits[par] = self.lims[par]
+            if par in self.lims:
+                self.m.limits[par] = self.lims[par]
     def fit(self):
         self.m.simplex().migrad()
         if not(self.m.valid):
@@ -132,7 +133,16 @@ class Fit2():
         v = self.w*y0 + (dy/3)*( (self.xmax-x0)**3 - (self.xmin-x0)**3 )
         e = 0 # написать правильно
         return (v, e)
-    
+
+class FitGauss():
+    def __init__(self):
+        pass
+    def __call__(self, x, m, s, n_sig):
+        return (n_sig, n_sig*np.exp( -(x - m)**2/2/(s**2))/np.sqrt(2*np.pi*(s**2)))
+    def get_nsig(self, minuit):
+        return (minuit.values['n_sig'], minuit.errors['n_sig'])
+    def get_nbkg(self, minuit):
+        return (0, 0)
 
 def sig_pdf(x, m, sL, sR, aL, aR, fit_range):
     return cruijff_norm(x, m, sL, sR, aL, aR, fit_range)
