@@ -34,7 +34,7 @@ def plot_fit(data, cost, minuit, bins, hist_range, fit_range=None, errors=True, 
     par_vals = minuit.values
     xcoord = np.linspace(fit_range[0], fit_range[1], 200)
 #     ax.plot(xcoord, pdf(xcoord, *par_vals, fit_range)*(hist_range[1]-hist_range[0])/bins, alpha=alpha, label='Fit result')
-    N = minuit.values['n_sig'] if 'n_bkg' not in minuit.parameters else minuit.values['n_sig'] + minuit.values['n_bkg']
+#     N = minuit.values['n_sig'] if 'n_bkg' not in minuit.parameters else minuit.values['n_sig'] + minuit.values['n_bkg']
     ax.plot(xcoord, cost.scaled_pdf(xcoord, *par_vals)[1]*(hist_range[1] - hist_range[0])/bins,
            alpha=alpha, label='Fit result', color=fit_color, zorder=3)
     if fill_errors:
@@ -56,15 +56,10 @@ def plot_fit(data, cost, minuit, bins, hist_range, fit_range=None, errors=True, 
                 s += f'{var} = {val:1.3f}\n'
             else:
                 s += f'{var} = {val:1.3f}$\\pm${err:3.3f}\n'
-        if fit_func is not None:
-            n_bkg, n_bkg_err = fit_func.get_nbkg(minuit)
-            if n_bkg is not None:
-                s += f'n_bkg = {n_bkg:1.3f}$\\pm${n_bkg_err:3.3f}\n'
-#         if ('y0' in minuit.parameters) and not( (minuit.values['y0'] == 0) and (minuit.values['dy'] == 0) ):
-#             width = (fit_range[1] - fit_range[0])
-#             n_bkg = width*(2*minuit.values['y0'] + minuit.values['dy'])/2
-#             n_bkg_err = width*np.sqrt(2*minuit.errors['y0']**2 + minuit.errors['dy']**2)/2
-#             s += f'n_bkg = {n_bkg:1.3f}$\\pm${n_bkg_err:3.3f}\n'
+#         if fit_func is not None:
+#             n_bkg, n_bkg_err = fit_func.get_nbkg(minuit)
+#             if n_bkg is not None:
+#                 s += f'n_bkg = {n_bkg:1.3f}$\\pm${n_bkg_err:3.3f}\n'
         props = dict(boxstyle='square', facecolor=bbox_color, alpha=0.5)
         ax.text(0.05, 0.95, s.strip(), transform=ax.transAxes,
                verticalalignment='top', bbox=props)

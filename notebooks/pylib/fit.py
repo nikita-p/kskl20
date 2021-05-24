@@ -134,6 +134,25 @@ class Fit2():
         e = 0 # написать правильно
         return (v, e)
 
+class FitPoly2():
+    def __init__(self, fit_range):
+        self.fit_range = fit_range
+        self.xmin, self.xmax = fit_range
+        self.w = fit_range[1] - fit_range[0]
+    def __call__(self, x, n_sig, m, sL, sR, aL, aR, n_bkg, b, c):
+        return (n_bkg+n_sig, n_sig*sig_pdf(x, m, sL, sR, aL, aR, self.fit_range) + n_bkg*self.poly2(x, b, c))
+    def poly2(self, x, b, c):
+        P1 = 1
+        P2 = lambda x: x
+        P3 = lambda x: (3*(x**2) - 1)/2
+        xn = 2*(x - self.xmin)/(self.xmax - self.xmin) - 1
+        norm = (self.xmax - self.xmin)
+        return (P1 + b*P2(xn) + c*P3(xn)) / norm
+    def get_nsig(self, minuit):
+        return (minuit.values['n_sig'], minuit.errors['n_sig'])
+    def get_nbkg(self, minuit):
+        return (minuit.values['n_bkg'], minuit.errors['n_bkg'])
+    
 class FitGauss():
     def __init__(self):
         pass

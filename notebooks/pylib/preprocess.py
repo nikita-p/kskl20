@@ -3,6 +3,7 @@ import pandas as pd
 import uproot
 import warnings
 import awkward as ak
+import vector
 
 def get_x(df: pd.DataFrame) -> (pd.Series, pd.Series):
     """
@@ -70,7 +71,7 @@ class Handler:
     def get_dat_tracks(self):
         e0 = self.tree['emeas'].array()[0]
         pidedx = '5.58030e+9 / (tptot + 40.)**3 + 2.21228e+3 - 3.77103e-1 * tptot - tdedx'
-        arrs = self.tree.arrays(['tz', 'tptot', 'tdedx', 'tcharge', 'trho'], 
+        arrs = self.tree.arrays(['tz', 'tptot', 'tdedx', 'tcharge', 'trho', 'tth', 'tphi'], 
                          f'(nt>=2)&(nks>0)&(tnhit>6)&(abs(pidedx)<{self.cut_dedx})&(tchi2r<20)&(tchi2z<20)&(abs(tz)<{self.cut_z})&(tptot<{e0})&(tptot>40)', 
                          aliases={'pidedx': pidedx})
         dat_tracks = ak.to_pandas(arrs)
@@ -79,14 +80,18 @@ class Handler:
         return dat_tracks.loc[idx]#.drop('tcharge', axis=1)
     def get_dat_kaons(self):
         dlt_mass = 'abs(ksminv-497.6)'
-        cuts = f'(nt>=2)&(ksalign>{self.cut_align})&(dlt_mass<100)'
-        dat_kaons = ak.to_pandas(self.tree.arrays(['ksptot', 'ksminv', 'ksalign', 'dlt_mass', 'ksvind', 'ksdpsi'], 
+        cuts = f'(nt>=2)&(nks>0)&(ksalign>{self.cut_align})&(dlt_mass<200)'
+        dat_kaons = ak.to_pandas(self.tree.arrays(['ksptot', 'ksminv', 'ksalign', 'dlt_mass', 'ksvind', 'ksdpsi', 'ksz0', 'kslen', 'ksth', 'ksphi'], 
                            cuts, aliases={'dlt_mass': dlt_mass})).loc[:, :, :1]
         dat_kaons = dat_kaons.reset_index().drop('subsubentry', axis=1).set_index(['entry', 'subentry'])
         kaons = dat_kaons.sort_values(by=['dlt_mass']).reset_index().drop_duplicates(subset=['entry'], keep='first').set_index(['entry', 'subentry']).index
         dat_kaons = dat_kaons.loc[kaons]
         return dat_kaons.reset_index().drop(['subentry'], axis=1).rename({'ksvind': 'subentry'}, axis=1).set_index(['entry', 'subentry'])
-    def get_good_kaons(self):
+    def get_good_kaons(self, photons='one'):
+        """
+        photons : None, 'one', 'all' -- как работать с фотонами из калориметра. None -- не добавлять их в данные, 
+        'one' -- только пару с лучшим соответствием pi0, 'all' -- добавить все пары
+        """
         dat_tracks = self.get_dat_tracks()
         dat_kaons = self.get_dat_kaons()
         dat_glob = self.get_dat_glob()
@@ -97,20 +102,72 @@ class Handler:
 
         dat_goods['tcharge'] = np.where(dat_goods['tcharge']>0, 'p', 'n')
         dat_goods = pd.pivot_table(dat_goods.reset_index(), values=['trho', 'tz', 'tdedx', 
-                    'tptot', 'ksminv', 'ksalign', 'ksptot', 'ksdpsi'], 
+                    'tptot', 'tth', 'tphi', 'ksminv', 'ksalign', 'ksptot', 'ksdpsi', 'ksz0', 'kslen', 'ksth', 'ksphi'], 
                index=['entry'], columns=['tcharge'])
         dat_goods.columns = ['_'.join(map(lambda x: str(x), col)) for col in dat_goods.columns]
-        dat_goods.drop(['ksalign_n', 'ksminv_n', 'ksptot_n', 'ksdpsi_n'], axis=1, inplace=True)
+        dat_goods.drop(['ksalign_n', 'ksminv_n', 'ksptot_n', 'ksdpsi_n', 'ksz0_n', 'kslen_n', 'ksth_n', 'ksphi_n'], axis=1, inplace=True)
         
         #kick badruns
         dat_glob = dat_glob.query('badrun==False')
         dat_goods = dat_goods.join(dat_glob, how='inner')
         
         #add x1, x2
-        dat_goods = dat_goods.rename({'ksalign_p': 'kalign', 'ksminv_p': 'ksminv',
-                                     'ksptot_p': 'ksptot', 'ksdpsi_p': 'ksdpsi'}, axis=1)
+        dat_goods = dat_goods.rename({'ksalign_p': 'ksalign', 'ksminv_p': 'ksminv',
+                                     'ksptot_p': 'ksptot', 'ksdpsi_p': 'ksdpsi', 'ksz0_p': 'ksz0', 'kslen_p': 'kslen', 'ksth_p': 'ksth',
+                                     'ksphi_p': 'ksphi'}, axis=1)
         dat_goods['x1'], dat_goods['x2'] = get_x(dat_goods)
+        
+        #calc recoil mass
+        vec = vector.array({
+            'pt' : dat_goods['ksptot']*np.sin(dat_goods['ksth']),
+            'theta' : dat_goods['ksth'],
+            'phi' : dat_goods['ksphi'],
+            'mass' : dat_goods['ksminv'],
+        })
+        vec0 = vector.obj(px=0, py=0, pz=0, E=dat_goods['emeas'].mean()*2)
+        dat_goods['recoil'] = (vec0 - vec).mass
+        del vec
+        
+        #add photons
+        if photons is not None:
+            dat_photons = self.get_dat_photons()
+            dat_goods = pd.merge(dat_goods.reset_index(), dat_photons.reset_index(), on='entry', how='left')
+            dat_goods['subentry'] = dat_goods['subentry'].fillna(0).astype(int)
+            dat_goods = dat_goods.set_index(['entry', 'subentry'])
+            if photons == 'one':
+                dat_goods = dat_goods.sort_values('M', ascending=True, key=lambda x: np.abs(x-134.97)).groupby('entry').agg('first')
         return dat_goods
+    def get_dat_photons(self):
+        arrs = self.tree.arrays(['pt', 'theta', 'phi', 'mass'], cut='(nt>=2)&(nks>0)&(phen>0)', aliases={'pt': 'phen*sin(phth)', 'theta': 'phth', 
+                                                                          'phi': 'phphi', 'mass': '0*phen'})
+        vecs = vector.Array(arrs)
+
+        df = ak.to_pandas(ak.combinations(vecs.px, 2))
+        df = df.rename({ '0' : 'px0', '1' : 'px1'}, axis=1)
+        df_len = len(df)
+
+        df = df.join( ak.to_pandas(ak.combinations(vecs.py, 2)) )
+        assert df_len == len(df)
+        df_len = len(df)
+        df = df.rename({ '0' : 'py0', '1' : 'py1'}, axis=1)
+
+        df = df.join( ak.to_pandas(ak.combinations(vecs.pz, 2)) )
+        assert df_len == len(df)
+        df_len = len(df)
+        df = df.rename({ '0' : 'pz0', '1' : 'pz1'}, axis=1)
+
+        df = df.join( ak.to_pandas(ak.combinations(vecs.E, 2)) )
+        assert df_len == len(df)
+        df_len = len(df)
+        df = df.rename({ '0' : 'E0', '1' : 'E1'}, axis=1)
+
+        for coord in ('x', 'y', 'z'):
+            df[f'P{coord}'] = df[f'p{coord}0'] + df[f'p{coord}1']
+        df['P'] = np.sqrt( df['Px']**2 + df['Py']**2 + df['Pz']**2 )
+        df['E'] = df['E0'] + df['E1']
+        M2 = df['E']**2 - df['P']**2
+        df['M'] = np.where(M2>0, np.sqrt( np.abs(M2) ), -np.sqrt( np.abs(M2) ))
+        return df
     def get_dat_glob(self):
         dat_glob = ak.to_pandas(self.tree.arrays(['ebeam', 'emeas', 'lumoff', 'lumofferr', 'runnum', 'finalstate_id']))
         badruns = np.loadtxt('pylib/badruns.dat')
