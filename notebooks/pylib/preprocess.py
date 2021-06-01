@@ -136,6 +136,7 @@ class Handler:
             dat_goods = dat_goods.set_index(['entry', 'subentry'])
             if photons == 'one':
                 dat_goods = dat_goods.sort_values('M', ascending=True, key=lambda x: np.abs(x-134.97)).groupby('entry').agg('first')
+        
         return dat_goods
     def get_dat_photons(self):
         arrs = self.tree.arrays(['pt', 'theta', 'phi', 'mass'], cut='(nt>=2)&(nks>0)&(phen>0)', aliases={'pt': 'phen*sin(phth)', 'theta': 'phth', 
