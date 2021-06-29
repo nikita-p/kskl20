@@ -4,6 +4,7 @@ import uproot
 import warnings
 import awkward as ak
 import vector
+import matplotlib.pyplot as plt
 
 def get_x(df: pd.DataFrame) -> (pd.Series, pd.Series):
     """
@@ -170,7 +171,184 @@ class Handler:
         df['M'] = np.where(M2>0, np.sqrt( np.abs(M2) ), -np.sqrt( np.abs(M2) ))
         return df
     def get_dat_glob(self):
-        dat_glob = ak.to_pandas(self.tree.arrays(['ebeam', 'emeas', 'lumoff', 'lumofferr', 'runnum', 'finalstate_id']))
+        """
+        Работа с глобальными переменными и поиск `badruns`
+        """
+        dat_glob = ak.to_pandas(self.tree.arrays(['ebeam', 'emeas', 'lumoff', 'lumofferr', 'runnum', 'finalstate_id', 'trigbits']))
         badruns = np.loadtxt('pylib/badruns.dat')
         dat_glob['badrun'] = dat_glob.runnum.isin(badruns)
         return dat_glob
+    
+class HandlerKSKS:
+    def __init__(self, tree, cut_dedx=2500, cut_z=12, cut_align=0.8):
+        """
+        Поиск KSKS
+        """
+        self.tree = tree
+        self.cut_dedx = cut_dedx
+        self.cut_z = cut_z
+        self.cut_align = cut_align
+    def get_dat_tracks(self):
+        e0 = self.tree['emeas'].array()[0]
+        pidedx = '5.58030e+9 / (tptot + 40.)**3 + 2.21228e+3 - 3.77103e-1 * tptot - tdedx'
+        arrs = self.tree.arrays(['tz', 'tptot', 'tdedx', 'tcharge', 'trho', 'tth', 'tphi'], 
+                         f'(nt>=4)&(nks==2)&(tnhit>6)&(abs(pidedx)<{self.cut_dedx})&(tchi2r<20)&(tchi2z<20)&(abs(tz)<{self.cut_z})&(tptot<{e0})&(tptot>40)', 
+                         aliases={'pidedx': pidedx})
+        dat_tracks = ak.to_pandas(arrs)
+        dat_tracks_groups = dat_tracks.groupby('entry').agg(uniques=('tz', 'count'), charge=('tcharge', 'sum'))
+        idx = dat_tracks_groups.query('(uniques==4)&(charge==0)').index
+        dat_tracks = dat_tracks.loc[idx]
+        dat_tracks.index.rename(['entry', 'ksvind'], inplace=True)
+        return dat_tracks
+    def get_dat_kaons(self):
+        dlt_mass = 'abs(ksminv-497.6)'
+        cuts = f'(nt>=4)&(nks==2)&(ksalign>{self.cut_align})&(dlt_mass<200)'
+        dat_kaons = ak.to_pandas(self.tree.arrays(['ksptot', 'ksminv', 'ksalign', 'dlt_mass', 'ksvind', 'ksdpsi', 'ksz0', 'kslen', 'ksth', 'ksphi'], 
+                           cuts, aliases={'dlt_mass': dlt_mass})).loc[:, :, :1]
+        
+        idx2kaons = dat_kaons.groupby('entry').agg(n=('ksvind', 'nunique')).query('n==4').index
+        dat_kaons = dat_kaons.loc[idx2kaons]
+        return dat_kaons.reset_index().set_index(['entry', 'subentry', 'ksvind']).drop(['subsubentry'], axis=1)
+    def get_good_kaons(self, photons='one'):
+        """
+        """
+        dat_tracks = self.get_dat_tracks()
+        dat_kaons = self.get_dat_kaons()
+        dat_glob = self.get_dat_glob()
+
+        dat_goods = dat_tracks.join(dat_kaons, how='inner')
+        
+        #kick badruns
+        dat_glob = dat_glob.query('badrun==False')
+        dat_goods = dat_goods.join(dat_glob, how='inner')
+        dat_goods['tcharge'] = np.where(dat_goods['tcharge']>0, 'p', 'n')
+        
+        #pivot
+        dat1 = pd.pivot_table(
+            dat_goods, values=['tz', 'trho', 'tdedx', 'tth', 'tphi'],
+            index=['entry', 'subentry'],
+            columns=['tcharge']
+        )
+        dat1.columns = ['_'.join(map(lambda x: str(x), col)) for col in dat1.columns]
+        dat2 = dat_goods.reset_index().drop_duplicates(subset=['entry', 'subentry']).set_index(['entry', 'subentry'])[['ksptot',
+       'ksminv', 'ksalign', 'dlt_mass', 'ksdpsi', 'ksz0', 'kslen', 'ksth',
+       'ksphi', 'ebeam', 'emeas', 'lumoff', 'lumofferr', 'runnum',
+       'finalstate_id', 'trigbits', 'badrun']]
+        dat1 = dat1.join(dat2)
+        return dat1
+    def get_dat_glob(self):
+        """
+        Работа с глобальными переменными и поиск `badruns`
+        """
+        dat_glob = ak.to_pandas(self.tree.arrays(['ebeam', 'emeas', 'lumoff', 'lumofferr', 'runnum', 'finalstate_id', 'trigbits']))
+        badruns = np.loadtxt('pylib/badruns.dat')
+        dat_glob['badrun'] = dat_glob.runnum.isin(badruns)
+        return dat_glob
+    def collinear_cut(df, col_th=0.25, col_phi=0.15, plot=False, return_pivot=False):
+        """
+        Кат на коллинеарность каонов: 0.25 по тета, 0.15 по фи
+        return_pivot - вернуть (pd.Series, pd.Series) с коллинеарностями (для собственной отрисовки)
+        """
+        dtemp_th = df.groupby('entry').agg(th1=('ksth', 'first'), th2=('ksth', 'last'))
+        coll_th = dtemp_th.loc[np.abs(dtemp_th.th1 + dtemp_th.th2 - np.pi) < col_th].index
+
+        dtemp_ph = df.groupby('entry').agg(ph1=('ksphi', 'first'), ph2=('ksphi', 'last'))
+        coll_ph = dtemp_ph.loc[np.abs( np.abs(dtemp_ph.ph2 - dtemp_ph.ph1) - np.pi) < col_phi].index
+        
+        if return_pivot:
+            return (np.abs(dtemp_th.th1 + dtemp_th.th2 - np.pi), np.abs(np.abs(dtemp_ph.ph2 - dtemp_ph.ph1) - np.pi))
+
+        if plot:
+            fig, ax = plt.subplots(1, 2)
+            ylabel = 'num of events per bin'
+            ax[0].hist(np.abs(dtemp_th.th1 + dtemp_th.th2 - np.pi), 
+                       bins=3*int(np.sqrt(len(dtemp_th))))
+            ax[0].axvline(x=col_th, ymin=0, ymax=1, color='green')
+            ax[0].set(xlim=(0, None), title='Collinearity $\\theta$',
+                     xlabel='$\\Delta\\theta$', ylabel=ylabel)
+            ax[1].hist(np.abs(np.abs(dtemp_ph.ph2 - dtemp_ph.ph1) - np.pi), 
+                       bins=3*int(np.sqrt(len(dtemp_ph))))
+            ax[1].axvline(x=col_phi, ymin=0, ymax=1, color='green')
+            ax[1].set(xlim=(0, None), title='Collinearity $\\phi$',
+                     xlabel='$\\Delta\\phi$', ylabel=ylabel)
+            plt.tight_layout()
+
+        return df.loc[coll_th.intersection(coll_ph)]
+    def sum_energy_cut(df, cut_en=100, plot=False, return_pivot=False):
+        """
+        Кат на разницу энергии пары каонов и пучков 100 МэВ (default)
+        return_pivot - вернуть pd.Series с полными энергиями (для собственной отрисовки)
+        """
+        dk = pd.pivot_table(
+            df.reset_index(),
+            index=['entry'],
+            values=['ksminv', 'ksptot', 'ksth', 'ksphi', 'kslen'],
+            columns=['subentry'],
+        )
+        dk.columns = ['_'.join(map(lambda x: str(x), col)) for col in dk.columns]
+
+        total_en = np.sqrt( dk.ksptot_0**2 + dk.ksminv_1**2 ) + np.sqrt( dk.ksptot_1**2 + dk.ksminv_1**2 )
+        
+        if return_pivot:
+            return total_en
+        
+        cal_en = df.emeas.mean()*2
+        idx = dk.loc[ np.abs(total_en - cal_en)<cut_en ].index
+        
+        if plot:
+            fig, ax = plt.subplots(1, 1)
+            ylabel = 'num of events per bin'
+            ax.hist(total_en, 
+                       bins=3*int(np.sqrt(len(total_en))))
+            ax.axvline(x=cal_en + cut_en, ymin=0, ymax=1, color='green')
+            ax.axvline(x=cal_en - cut_en, ymin=0, ymax=1, color='green')
+            ax.set(title='Total energy of the particles',
+                     xlabel='Total energy, MeV', ylabel=ylabel)
+            plt.tight_layout()
+        
+        return df.loc[idx]
+    def kaon_mom_cut(df, cut_mom=60, plot=False):
+        """
+        Кат на импульс каона 60 МэВ
+        """
+        cal_mom = np.sqrt(df.emeas.mean()**2 - 497.6**2)
+        fls = df.loc[ np.abs(df.ksptot - cal_mom) < cut_mom ]
+        idx = fls.reset_index().groupby('entry').agg({'subentry' : 'count'}).query('subentry==2').index
+
+        if plot:
+            fig, ax = plt.subplots(1, 1)
+            ylabel = 'num of events per bin'
+            ax.hist(df.ksptot, 
+                       bins=3*int(np.sqrt(len(df.ksptot))))
+            ax.axvline(x=cal_mom + cut_mom, ymin=0, ymax=1, color='green')
+            ax.axvline(x=cal_mom - cut_mom, ymin=0, ymax=1, color='green')
+            ax.set(title='Momentum of the KS',
+                     xlabel='Momentum, MeV', ylabel=ylabel)
+            plt.tight_layout()
+        
+        return df.loc[idx]
+    def flight_cut(df, cut_flight=0.1, plot=False):
+        """
+        Кат на отлёт 0.1 см
+        """
+        idx = df.loc[df.kslen > cut_flight].reset_index().groupby('entry').agg({'subentry': 'count'}).query('subentry==2').index
+        
+        if plot:
+            fig, ax = plt.subplots(1, 1)
+            ylabel = 'num of events per bin'
+            ax.hist(df.kslen, 
+                       bins=3*int(np.sqrt(len(df.kslen))))
+            ax.axvline(x=cut_flight, ymin=0, ymax=1, color='green')
+            ax.set(title='KS flight length, cm',
+                     xlabel='Momentum, MeV', ylabel=ylabel)
+            plt.tight_layout()
+            
+        
+        return df.loc[idx]
+    def ksminv_cut(df, cut_mass=25):
+        """
+        Кат на инв. массу 25 МэВ
+        """
+        idx = df.loc[(df.ksminv - 497.6) < cut_mass ].reset_index().groupby('entry').agg({'subentry': 'count'}).query('subentry==2').index
+        return df.loc[idx]
+        

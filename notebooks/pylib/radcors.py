@@ -63,7 +63,10 @@ class RadCor:
         sx = 4*(self.x**2)
         if not( np.all(np.diff(sx) > 0) ):
             raise Exception('Problem')
-        regeff = lambda x: RegEff.sigFunc(np.sqrt(s/4)*x*1e-3, *params) if use_efficiency else lambda x: 1
+        if use_efficiency:
+            regeff = lambda x: RegEff.sigFunc(np.sqrt(s/4)*x*1e-3, *params) 
+        else:
+            regeff = lambda x: 1
         return quad( lambda x: self.F(x, s)*np.interp(s*(1-x), sx, self.y)*regeff(x),
                     0., Xmax, points=[0, 1], limit=50000, epsrel=0.0001)
     def F_Radcor(self, e_beam, params, Xmax=1, use_efficiency=True):
