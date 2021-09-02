@@ -16,9 +16,16 @@ class RadCor:
 
     def __init__(self, energies, cross_sections, e_threshold=497.6):
         """
-        energies - энергии пучка, в МэВ; cross_sections - сечения, в нб;
-        e_theshold - пороговая энергия пучка реакции, в МэВ
+        Parameters
+        ----------
+        energies: np.array
+            энергии пучка, в МэВ
+        cross_sections: np.array
+            сечения для энергий energies, в нб
+        e_theshold: float
+            пороговая энергия пучка реакции, в МэВ
         """
+        
         data = np.array([energies, cross_sections]).T 
         self.data = data[data[:,0].argsort()]
         spline = make_interp_spline(self.data[:, 0], self.data[:, 1], k=2)

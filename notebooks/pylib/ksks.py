@@ -95,7 +95,7 @@ def preprocess_point(row, df_4pic, season='19', force_process=False, print_log=T
     }
     return d0
 
-def process_point(row, df_4pic, season='19', print_log=True):
+def process_point(row, df_4pic: pd.DataFrame, season: str = '19', print_log: bool = True) -> dict:
     """
     Дообработать строку `row`
     df_4pic - данные для 4pi

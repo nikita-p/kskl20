@@ -1,5 +1,6 @@
 import numba as nb
 import numpy as np
+import pandas as pd
 from .style import plot_fit
 import iminuit
 from iminuit import Minuit
@@ -9,17 +10,31 @@ from scipy.stats import poisson
 
 import os
 import warnings
+from typing import Callable, Union, Tuple, List, Dict
 
 class Fitter():
-    def __init__(self, data, fit_func, pars:dict, lims:dict, fit_range:tuple, sigmas={}):
+    """
+    Класс, предназначенный для фитирования гистограмм
+    """
+    
+    def __init__(self, data: Union[np.array, pd.Series], fit_func: callable, pars: Dict[str, float], lims: Dict[str, Tuple[float, float]], fit_range: Tuple[float, float], sigmas: Dict[str, float] = {}):
         """
-        data - данные для фита
-        fit_func:callable - функция фита (зависит x и фитируемых параметров) из классов ниже
-        pars - словарь с начальными значениями параметров
-        lims - словарь с ограничениями на параметры
-        fit_range - кортеж (xmin, xmax) с областью фитирования
-        sigmas - словарь с отклонением параметров для регуляризации (может использоваться в эксперименте, чтоб мягко ограничить параметры)
+        Parameters
+        ----------
+        data : Union[np.array, pd.Series]
+            данные для фита
+        fit_func : callable
+            функция фита (зависит x и фитируемых параметров) из классов ниже
+        pars : Dict[str, float]
+            словарь с начальными значениями параметров
+        lims : Dict[str, Tuple[float, float]]
+            словарь с ограничениями на параметры
+        fit_range : Tuple[float, float]
+            кортеж (xmin, xmax) с областью фитирования
+        sigmas : Dict[str, float]
+            словарь с отклонением параметров для регуляризации (может использоваться в эксперименте, чтоб мягко ограничить параметры) (default is {})
         """
+        
         xmin, xmax = fit_range
         self.fit_range = fit_range
         self.fit_func = fit_func
@@ -35,44 +50,80 @@ class Fitter():
         for par in self.m.parameters:
             if par in self.lims:
                 self.m.limits[par] = self.lims[par]
+    
     def fit(self):
+        """
+        Фитировать распределение
+        """
+        
         self.m.simplex().migrad()
         if not(self.m.valid):
             warnings.warn("Fit is not valid", UserWarning)
-    def plot(self, hist_range, bins, title='', label='', xtitle='', ytitle='', 
-             errors=True, alpha=0.8, description=True, fill_errors=False):
+    
+    def plot(self, hist_range: Tuple[float, float], bins: int, title: str = '', label: str = '', xtitle: str = '', ytitle: str = '', 
+             errors: bool = True, alpha: float = 0.8, description: bool = True, fill_errors: bool = False):
         """
         Нарисовать фит
-        hist_range:tuple - диапазон, на котором будет изображаться результат
-        bins:int - количество бинов в диапазоне
-        title:str - название картинки
-        label:str - подпись данных
-        xtitle:str - подпись оси x
-        ytitle:str - подпись оси y
-        errors:bool - изображать ли усы для даных
-        alpha:float - прозрачность линии фита в диапазоне [0, 1]
-        description:bool - добавить описание
-        fill_errors:bool - закрасить область одной ошибки для фита
+        
+        Parameters
+        ----------
+        hist_range : Tuple[float, float]
+            диапазон, на котором будет изображаться результат
+        bins : int
+            количество бинов в диапазоне
+        title : str
+            название картинки (default is '')
+        label : str
+            подпись данных (default is '')
+        xtitle : str
+            подпись оси x (default is '')
+        ytitle : str
+            подпись оси y (default is '')
+        errors : bool
+            изображать ли усы для даных (default is True)
+        alpha : float
+            прозрачность линии фита в диапазоне [0, 1] (default is 0.8)
+        description : bool 
+            добавить описание (default is True)
+        fill_errors : bool
+            закрасить область одной ошибки для фита (default is False)
         """
+        
         plot_fit(self.data, self.cost, self.m, bins, hist_range, self.fit_range, errors=errors, label=label, xtitle=xtitle, alpha=alpha,
                    ytitle=ytitle, title=title, description=description, fill_errors=fill_errors, fit_func=self.fit_func)
+        
     def get_fitfunc(self) -> callable:
         """
         Вернуть функцию фита
         """
+        
         return self.fit_func
     def get_params(self) -> dict:
         """
         Вернуть значения параметров фита
         """
+        
         return {v : self.m.values[v] for v in self.m.parameters}
-    def get_limits(self, n_sigmas=2, include=['m', 'sL'], my_lims={}) -> dict:
+    
+    def get_limits(self, n_sigmas: float = 2, include: List[str] = ['m', 'sL'], my_lims: Dict[str, Tuple[float, float]] = {}) -> Dict[str, Tuple[float, float]]:
         """
         Вернуть ограничения на параметры фита
-        n_sigmas:float - количество сигм для ограничения
-        include:list - список параметров, к которым будет применено ограничение на сигмы
-        my_lims:dict - список кортежей с собственными ограничениями на параметры
+        
+        Parameters
+        ----------
+        n_sigmas : float
+            количество сигм для ограничения
+        include : list
+            список параметров, к которым будет применено ограничение на сигмы
+        my_lims : Dict[str, Tuple[float, float]]
+            список кортежей с собственными ограничениями на параметры
+        
+        Returns
+        -------
+        Dict[str, Tuple[float, float]]
+            ограничения на параметры фита
         """
+        
         lims_dict = self.lims.copy()
         for key in include:
             m = self.m.values[key]
@@ -85,11 +136,21 @@ class Fitter():
             lims_dict[key] = my_lims[key]
         return lims_dict
         
-    def get_sigmas(self, exclude=['n_sig']) -> dict:
+    def get_sigmas(self, exclude: List[str] = ['n_sig']) -> dict:
         """
         Вернуть стандартные отклонения для параметров фита
-        exclude:list - список параметров, которые не нужно возвращать
+        
+        Parameters
+        ----------
+        exclude : List[str]
+            список параметров, которые не нужно возвращать (default is `['n_sig']`)
+            
+        Returns
+        -------
+        Dict[str, float]
+            стандартные отклонения для параметров фита
         """
+        
         sigmas_dict = {v : self.m.errors[v] for v in self.m.parameters}
         for ex in exclude:
             sigmas_dict.pop(ex, None)

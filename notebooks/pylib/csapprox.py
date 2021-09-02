@@ -1,7 +1,43 @@
 import numpy as np
 from scipy.integrate import quad
+from typing import Union, List
 
 class MDVM():
+    """
+    Фитировать сечения с помощью МДВМ
+    
+    ...
+    
+    Attributes
+    ----------
+    ALPHA : float
+        alpha constant
+    C : float
+        conversion constant
+    mPhi : float
+        phi meson mass, MeV
+    mRho : float
+        rho meson mass, MeV
+    mOmg : float
+        omega meson mass, MeV
+    mK0 : float
+        neutral kaon mass, MeV
+    mP0 : float
+        neutral pion mass, MeV
+    mKC : float
+        charged kaon mass, MeV
+    mPC : float
+        charged pion mass, MeV
+    mKstar : float
+        K* mass, MeV
+    w0Phi : float
+        width of the phi meson, MeV
+    w0Rho : float
+        width of the rho meson, MeV
+    w0Omg : float
+        width of the omega meson, MeV    
+    """
+    
     def __init__(self):
         self.ALPHA = 7.297352e-3
         self.C = 0.3893793656e12 #(MeV)^2 * nb
@@ -20,31 +56,121 @@ class MDVM():
         self.w0Rho = 149.1
         self.w0Omg = 8.49
     
-    def BETA(self, s, M_K): #бета
+    def BETA(self, s: np.array, M_K: float) -> np.array:
+        """
+        Вычислить бета-фактор для частицы с массой M_K
+        
+        Parameters
+        ----------
+        s : numpy.array
+            s, Mev^2
+        M_K : float
+            particle mass, MeV
+            
+        Returns
+        -------
+        beta : float
+            beta-factor
+        """
+        
         E = np.sqrt(s)/2.
         P = np.where( E<M_K, 0, np.sqrt( E**2 - M_K**2 ) )
         return P/E
-    def q(self, M, m1, m2):
+    
+    def q(self, M: float, m1: float, m2: float) -> float:
+        """
+        Parameters
+        ----------
+        M : float
+            масса распавшейся частицы
+        m1 : float
+            масса первой распадной частицы
+        m2 : float
+            масса второй распадной частицы
+        
+        Returns
+        -------
+        q : float
+            безразмерный параметр q
+        """
+        
         return math.sqrt( (M**2 - (m1 - m2)**2 )*( M**2 - (m1 + m2)**2 ) )/(2*M)
-    def PV2_diff(self, s, M, mi, mj): #фазовый объём распада на 2 разные частицы https://arxiv.org/pdf/hep-ph/9609216.pdf (2.6)
+    
+    def PV2_diff(self, s: np.array, M: float, mi: float, mj: float) -> np.array:
+        """
+        Фазовый объём распада на 2 разные частицы https://arxiv.org/pdf/hep-ph/9609216.pdf (2.6)
+        
+        Parameters
+        ----------
+        s : numpy.array
+            s, MeV^2
+        M : float
+            масса распавшейся частицы, MeV
+        mi : float
+            масса первой распадной частицы, MeV
+        mj : float
+            масса второй распадной частицы, MeV
+        
+        Returns
+        -------
+        float
+            относительный фазовый объём распада на 2 разные частицы
+        """
+        
         q0 = np.sqrt( (M**2 - (mi - mj)**2)*(M**2 - (mi + mj)**2) )/(2*M)
         E = np.sqrt(s)
         q_temp = np.where( E <= (mi + mj), 0, (E**2 - (mi - mj)**2)*(E**2 - (mi + mj)**2) )
         q1 = np.sqrt( q_temp )/(2*E)
         return (q1/q0)**3
-    def PV2(self, s, M, Mn): #фазовый объём распада на 2 одинаковые частицы
+    
+    def PV2(self, s: np.array, M: float, Mn: float) -> np.array:
+        """
+        Фазовый объём распада на 2 одинаковые частицы
+        
+        Parameters
+        ----------
+        s : np.array
+            s, MeV^2
+        M : float
+            масса распавшейся частицы, MeV
+        Mn : flaot
+            масса частицы из распада, MeV
+        
+        Returns
+        -------
+        w : float
+            фазовый объём
+        """
+        
         w = np.where(s <= 4*Mn*Mn, 0, np.power( (s - 4*Mn**2)/(M**2 - 4*Mn**2), 3./2 )*(M**2)/s )
         return w
-    def FAS3_RhoPiPi(self, s):
+    
+    def FAS3_RhoPiPi(self, s: np.array) -> np.array:
+        """
+        Фазовый объём распада ро в 2 пи
+        
+        Parameters
+        ----------
+        s : numpy.array
+            s, MeV^2
+        
+        Returns
+        -------
+        numpy.array
+            фазовый объём
+        """
+        
         e = np.sqrt(s)*1e-3
         f1 = 1.9e-3 + 2.68e-2*(e-1.2) + 2.446e-1 * (e-1.2)**2 + 3.1487 * (e-1.2)**3 + 23.3131 * (e-1.2)**4 + 59.7669 * (e-1.2)**5
         f2 = 1.9e-3 + 2.33e-2*(e-1.2) + 6.65e-2 * (e-1.2)**2 - 3.84e-2 * (e-1.2)**3 + 2.36e-2 * (e-1.2)**4 - 6.5e-3 * (e-1.2)**5
         return np.where(e<1.2, f1, f2)
-    def FAS3_OmgPiPi(self, s):
+    
+    def FAS3_OmgPiPi(self, s):        
         e = np.sqrt(s)*1e-3
         f1 = 1.7e-3 + 2.61e-2*(e-1.2) + 2.67e-1 * (e-1.2)**2 + 3.61199 * (e-1.2)**3 + 27.6 * (e-1.2)**4 + 73.6433 * (e-1.2)**5
         f2 = 1.7e-3 + 2.18e-2*(e-1.2) + 6.89e-2 * (e-1.2)**2 - 4.52e-2 * (e-1.2)**3 + 3.25e-2 * (e-1.2)**4 - 1.09e-2 * (e-1.2)**5
         return np.where(e<1.2, f1, f2)
+    
     def FAS3(self, s):
         e = np.sqrt(s)*1e-3
         f1 = 5.196 + 59.17*(e-1) + 227.7 * (e-1)**2 + 147 * (e-1)**3 - 998 * (e-1)**4 - 1712 * (e-1)**5
@@ -173,18 +299,89 @@ class MDVM():
         F1 += KP[1] * self.BW_Phi1(s, m5, w5) + KP[2] * self.BW_Phi2(s, m7, w7)
         return F1
         
-    def Cross_Section(self, x, par, charged=False):
+    def Cross_Section(self, x: np.array, par: List[float], charged: bool = False) -> np.array:
+        """
+        Получить сечение e+e- -> KSKL или e+e- -> K+K-, используя параметры
+        
+        Parameters
+        ----------
+        x : numpy.array
+            набор s, в которых нужно вернуть сечение, GeV^2
+        par : List[float]
+            список параметров для вычисления формфактора
+        charged : bool
+            сечение в заряженные (True) или нейтральные (False) каоны нужно вернуть (default is False)
+            
+        Returns
+        -------
+        cs : numpy.array
+            сечение в точках x
+        """
+        
         s = (x*1e3)**2
         fabs2 = np.abs( self.F1(x, par, charged) )**2
         M_K = self.mKC if charged else self.mK0
         constant = (np.pi/3.) * (self.ALPHA**2) * self.C
         cs = np.where( x<0.4976*2, 0, constant * (self.BETA(s, M_K)**3) * fabs2 / s  )
         return cs
+    
     def Cross_Section_Neutral(self, x, par):
+        """
+        Получить сечение e+e- -> KSKL, используя параметры
+        
+        Parameters
+        ----------
+        x : numpy.array
+            набор s, в которых нужно вернуть сечение, GeV^2
+        par : List[float]
+            список параметров для вычисления формфактора
+            
+        Returns
+        -------
+        cs : numpy.array
+            сечение в точках x
+        """
+        
         return self.Cross_Section(x, par, False)
+    
     def Cross_Section_Charged(self, x, par):
+        """
+        Получить сечение e+e- -> K+K-, используя параметры
+        
+        Parameters
+        ----------
+        x : numpy.array
+            набор s, в которых нужно вернуть сечение, GeV^2
+        par : List[float]
+            список параметров для вычисления формфактора
+            
+        Returns
+        -------
+        cs : numpy.array
+            сечение в точках x
+        """
+        
         return self.Cross_Section(x, par, True)    
+    
     def Cross_Section2Formfacror(self, x, cs, mode=False):
+        """
+        Перевести сечение в формфактор
+        
+        Parameters
+        ----------
+        x : numpy.array
+            набор s, в которых нужно вернуть формфактор, GeV^2
+        cs : numpy.array
+            список сечений в точках x, nb
+        mode : bool
+            использовать заряженный (True) или нейтральный каон (False) (default is False)
+            
+        Returns
+        -------
+        numpy.array
+            формфактор
+        """
+        
         s = (x*1e3)**2
         M_K = self.mKC if mode else self.mK0
         constant = (np.pi/3.) * (self.ALPHA**2) * self.C

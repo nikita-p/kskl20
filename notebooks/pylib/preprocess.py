@@ -6,10 +6,23 @@ import awkward as ak
 import vector
 import matplotlib.pyplot as plt
 
-def get_x(df: pd.DataFrame) -> (pd.Series, pd.Series):
+from typing import Tuple
+
+def get_x(df: pd.DataFrame) -> Tuple[pd.Series, pd.Series]:
     """
     Получить x1, x2 координаты из pd.DataFrame
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        датафрейм с данными
+    
+    Returns
+    -------
+    Tuple[pd.Series, pd.Series]
+        координаты x1, x2 соответственно
     """
+    
     rotate_f = lambda e: 0.205/(e*2e-3-0.732) + 0.14
     mKs, p = 497.6, rotate_f(df.emeas)
     p0 = np.sqrt(df.emeas**2 - mKs**2)
