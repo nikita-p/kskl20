@@ -1,5 +1,7 @@
 import numpy as np
 from inspect import signature
+import pyik.numpyext
+import matplotlib.pyplot as plt
 
 def chi2_ndf(data1, data2, range, bins, weights1=None, weights2=None, roll_bins=0):
     """Проверяю две гистограммы на соответствие друг другу через хи-квадрат.
@@ -19,15 +21,24 @@ def chi2_ndf_prob(data, cost, minuit, fit_range, bins=50):
     """Проверить на соответствие гистрограмму и фит. Нулевые бины игнорируются
     """
     d_hist, d_bins = np.histogram(data, bins=bins, range=fit_range)
-    d_errs = np.sqrt(d_hist)
-    bins_centers = (d_bins[:-1] + d_bins[1:])/2
-    d_hist, d_errs = np.ma.masked_array(d_hist, mask=(d_hist==0)), np.ma.masked_array(d_errs, mask=(d_hist==0))
-    bin_width = ((fit_range[1] - fit_range[0])/bins)
+    d_errs = (pyik.numpyext.poisson_uncertainty(d_hist))
+    bin_centers, half_bin_widths = pyik.numpyext.centers(d_bins)
     N = minuit.values['n_sig'] if 'n_bkg' not in minuit.parameters else minuit.values['n_sig'] + minuit.values['n_bkg']
-    foo = cost.scaled_pdf(bins_centers, *minuit.values)[1]*bin_width
-    d_hist = d_hist - foo
-    n_pars = minuit.nfit #len(signature(pdf).parameters) - 1 # x as -1
-    return ( ((d_hist/d_errs)**2).sum(), (~d_hist.mask).sum() - n_pars - 1)
+    foo = cost.scaled_pdf(bin_centers, *minuit.values)[1]*(2*half_bin_widths[0])
+    d_hist = foo - d_hist
+    n_pars = minuit.nfit
+    return ((d_hist/np.where(d_hist<0, d_errs[0], d_errs[1]))**2).sum(), len(d_hist) - n_pars - 1
+    
+#     d_hist, d_bins = np.histogram(data, bins=bins, range=fit_range)
+#     d_errs = np.sqrt(d_hist)
+#     bins_centers = (d_bins[:-1] + d_bins[1:])/2
+#     d_hist, d_errs = np.ma.masked_array(d_hist, mask=(d_hist==0)), np.ma.masked_array(d_errs, mask=(d_hist==0))
+#     bin_width = ((fit_range[1] - fit_range[0])/bins)
+#     N = minuit.values['n_sig'] if 'n_bkg' not in minuit.parameters else minuit.values['n_sig'] + minuit.values['n_bkg']
+#     foo = cost.scaled_pdf(bins_centers, *minuit.values)[1]*bin_width
+#     d_hist = d_hist - foo
+#     n_pars = minuit.nfit #len(signature(pdf).parameters) - 1 # x as -1
+#     return ( ((d_hist/d_errs)**2).sum(), (~d_hist.mask).sum() - n_pars - 1)
 
 def efficiency_error(numerator, denominator):
     """

@@ -4,7 +4,7 @@ import pandas as pd
 from .style import plot_fit
 import iminuit
 from iminuit import Minuit
-from iminuit.cost import UnbinnedNLL, ExtendedUnbinnedNLL, NormalConstraint 
+from iminuit.cost import UnbinnedNLL, ExtendedUnbinnedNLL, NormalConstraint
 from scipy.integrate import quad
 from scipy.stats import poisson
 
@@ -61,7 +61,8 @@ class Fitter():
             warnings.warn("Fit is not valid", UserWarning)
     
     def plot(self, hist_range: Tuple[float, float], bins: int, title: str = '', label: str = '', xtitle: str = '', ytitle: str = '', 
-             errors: bool = True, alpha: float = 0.8, description: bool = True, fill_errors: bool = False):
+             errors: bool = True, alpha: float = 0.8, lw: int = 1, description: bool = True, fill_errors: bool = False,
+             plot_bkg: bool = False, bbox_color: str = 'ivory', fit_color: str = None, data_color: str = None, print_fixed_vals: bool = True):
         """
         Нарисовать фит
         
@@ -83,14 +84,27 @@ class Fitter():
             изображать ли усы для даных (default is True)
         alpha : float
             прозрачность линии фита в диапазоне [0, 1] (default is 0.8)
+        lw : int
+            толщина линии фита (default is 1)
         description : bool 
             добавить описание (default is True)
         fill_errors : bool
             закрасить область одной ошибки для фита (default is False)
+        plot_bkg : bool
+            изобразить фит фона
+        bbox_color : str
+            цвет bbox
+        fit_color : Optional[str]
+            цвет линии фита
+        data_color : Optional[str]
+            цвет линии данных
+        print_fixed_vals : bool
+            печатать фиксированные значения фита
         """
         
-        plot_fit(self.data, self.cost, self.m, bins, hist_range, self.fit_range, errors=errors, label=label, xtitle=xtitle, alpha=alpha,
-                   ytitle=ytitle, title=title, description=description, fill_errors=fill_errors, fit_func=self.fit_func)
+        plot_fit(self.data, self.cost, self.m, bins, hist_range, self.fit_range, errors=errors, label=label, xtitle=xtitle, alpha=alpha, lw=lw,
+                   ytitle=ytitle, title=title, description=description, fill_errors=fill_errors, fit_func=self.fit_func, plot_bkg=plot_bkg,
+                 bbox_color=bbox_color, fit_color=fit_color, data_color=data_color, print_fixed_vals=print_fixed_vals)
         
     def get_fitfunc(self) -> callable:
         """

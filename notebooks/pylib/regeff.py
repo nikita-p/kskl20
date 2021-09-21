@@ -60,7 +60,7 @@ class RegEff():
 #         data_errs = np.sqrt(err.groupby(err.index).agg('sum')).reindex(index=np.arange(n_bins)).fillna(0)/data2
 #         print(data_errs)
         return (data, data_errs, bins)
-    def fit_data(data, data_errs, bins, data_color=None, fit_color=None, box_color=None, mu0=0.02, s0=1/250, name=None):
+    def fit_data(data, data_errs, bins, data_color=None, fit_color=None, bbox_color=None, mu0=0.02, s0=1/250, name=None):
         parameters = {
             'mu' : mu0,
             's' : s0,
@@ -69,14 +69,14 @@ class RegEff():
         }
         parameters_options = {
             'mu' : ([0, 1], 0.01),
-            's' : ([0,1], 1/25),
+            's' : ([0,1], 1/250),
             'c' : ([0,1], 0.01),
             'N' : ([0,1], 0.05),
         }
         m = Minuit(LeastSquares(bins, data, data_errs, RegEff.sigFunc), **parameters)
-        for par in m.parameters:
-            m.limits[par], m.errors[par] = parameters_options[par]
-        m.migrad()
+#         for par in m.parameters:
+#             m.limits[par], m.errors[par] = parameters_options[par]
+        m.simplex().migrad().hesse().hesse()
         
         if not(m.accurate):
             warnings.warn('Minuit troubles')
@@ -96,8 +96,8 @@ class RegEff():
         xx = np.linspace(0, np.max(bins), 100)
         ax.errorbar(bins, data, yerr=data_errs, fmt='.', color=data_color)
         ax.plot(xx, RegEff.sigFunc(xx, *m.values), color=fit_color)
-        my_style(title=f'Registration eff. vs rad. photon energy', xlim=(0, np.max(bins)), ylim=(0, None), 
-                xtitle='$E_{\\gamma}$, GeV', ytitle='$\\varepsilon_{reg}$')
+        my_style(title=(name if name is not None else 'Registration eff. vs rad. photon energy'), xlim=(0, np.max(bins)), ylim=(0, None), 
+                xtitle='$E_{\\gamma}$, GeV', ytitle='$\\varepsilon_{reg}$', grid_alpha=(0.3, 0.1))
         values_dict = dict(zip(m.parameters, m.values))
         chi2, ndf = m.fval, len(bins)-len(m.parameters)-1
         s =  f'$\\chi^2$ / ndf = {chi2:.2f} / {ndf}\n'
@@ -107,11 +107,11 @@ class RegEff():
                 s += f'{var} = {val:1.3f}\n'
             else:
                 s += f'{var} = {val:1.3f}$\\pm${err:.4f}\n'
-        props = dict(boxstyle='square', facecolor=box_color, alpha=0.5)
+        props = dict(boxstyle='square', facecolor=bbox_color, alpha=0.5)
         ax.text(0.65, 0.95, s.strip(), transform=ax.transAxes,
                verticalalignment='top', bbox=props)
         return fit_results
-    def fit(self, index, n_bins=100, data_color=None, fit_color=None, box_color=None, data=None, mu0=0.02, s0=1/250):
+    def fit(self, index, n_bins=100, data_color=None, fit_color=None, bbox_color=None, data=None, mu0=0.02, s0=1/250):
         if data is not None:
             data, data_errs, bins = data
         else:
@@ -163,7 +163,7 @@ class RegEff():
                 s += f'{var} = {val:1.3f}\n'
             else:
                 s += f'{var} = {val:1.3f}$\\pm${err:.4f}\n'
-        props = dict(boxstyle='square', facecolor=box_color, alpha=0.5)
+        props = dict(boxstyle='square', facecolor=bbox_color, alpha=0.5)
         ax.text(0.65, 0.95, s.strip(), transform=ax.transAxes,
                verticalalignment='top', bbox=props)
         return 
